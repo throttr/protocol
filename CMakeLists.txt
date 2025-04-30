@@ -16,6 +16,30 @@ target_include_directories(throttr-protocol INTERFACE
 )
 target_compile_features(throttr-protocol INTERFACE cxx_std_23)
 
+include(CMakePackageConfigHelpers)
+
+install(TARGETS throttr-protocol
+        EXPORT throttr-protocolTargets
+)
+
+install(EXPORT throttr-protocolTargets
+        FILE throttr-protocolTargets.cmake
+        NAMESPACE throttr::
+        DESTINATION lib/cmake/throttr-protocol
+)
+
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/throttr-protocolConfigVersion.cmake"
+        VERSION 1.0.0
+        COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/throttr-protocolConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/throttr-protocolConfigVersion.cmake"
+        DESTINATION lib/cmake/throttr-protocol
+)
+
 if (BUILD_TESTS)
     include(FetchContent)
     FetchContent_Declare(
