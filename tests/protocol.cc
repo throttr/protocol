@@ -78,7 +78,7 @@ TEST(RequestInsertBenchmark, DecodePerformance) {
     const auto _duration = duration_cast<nanoseconds>(_end - _start);
 
     std::cout << "RequestInsert iterations: " << _iterations
-              << " on " << _duration.count() << " ns" << std::endl;
+            << " on " << _duration.count() << " ns" << std::endl;
 }
 
 TEST(RequestQueryBenchmark, DecodePerformance) {
@@ -98,13 +98,13 @@ TEST(RequestQueryBenchmark, DecodePerformance) {
     const auto _duration = duration_cast<nanoseconds>(_end - _start);
 
     std::cout << "RequestQuery iterations: " << _iterations
-              << " on " << _duration.count() << " ns" << std::endl;
+            << " on " << _duration.count() << " ns" << std::endl;
 }
 
 TEST(RequestInsertTest, RejectsInvalidPayloadSize) {
     std::vector<std::byte> _buffer(request_insert_header_size + 5);
 
-    auto *_header = reinterpret_cast<request_insert_header*>(_buffer.data()); // NOSONAR
+    auto *_header = reinterpret_cast<request_insert_header *>(_buffer.data()); // NOSONAR
     _header->request_type_ = request_types::insert;
     _header->quota_ = 10;
     _header->usage_ = 0;
@@ -119,7 +119,7 @@ TEST(RequestInsertTest, RejectsInvalidPayloadSize) {
 TEST(RequestQueryTest, RejectsInvalidPayloadSize) {
     std::vector<std::byte> _buffer(request_query_header_size + 5);
 
-    auto *_header = reinterpret_cast<request_query_header*>(_buffer.data()); // NOSONAR
+    auto *_header = reinterpret_cast<request_query_header *>(_buffer.data()); // NOSONAR
     _header->request_type_ = request_types::query;
     _header->consumer_id_size_ = 5;
     _header->resource_id_size_ = 5;
@@ -193,57 +193,33 @@ TEST(RequestPurgeTest, RejectsInvalidPayloadSize) {
 
 
 TEST(RequestKeyTest, EqualsIdenticalKeys) {
-    const request_key _a{
-        "consumer1",
-        "/resource1"
-    };
+    const request_key _a{"consumer1","/resource1"};
 
-    const request_key _b{
-        "consumer1",
-        "/resource1"
-    };
+    const request_key _b{"consumer1","/resource1"};
 
     EXPECT_TRUE(_a == _b);
 }
 
 TEST(RequestKeyTest, NotEqualsDifferentConsumerID) {
-    const request_key _a{
-        "consumer1",
-        "/resource1"
-    };
+    const request_key _a{"consumer1","/resource1"};
 
-    const request_key _b{
-        "consumer2",
-        "/resource1"
-    };
+    const request_key _b{"consumer2","/resource1"};
 
     EXPECT_FALSE(_a == _b);
 }
 
 TEST(RequestKeyTest, NotEqualsDifferentResourceID) {
-    const request_key _a{
-        "consumer1",
-        "/resource1"
-    };
+    const request_key _a{"consumer1","/resource1"};
 
-    const request_key _b{
-        "consumer1",
-        "/resource2"
-    };
+    const request_key _b{"consumer1","/resource2"};
 
     EXPECT_FALSE(_a == _b);
 }
 
 TEST(RequestKeyTest, NotEqualsDifferentBothFields) {
-    const request_key _a{
-        "consumer1",
-        "/resource1"
-    };
+    const request_key _a{"consumer1", "/resource1"};
 
-    const request_key _b{
-        "consumer2",
-        "/resource2"
-    };
+    const request_key _b{"consumer2", "/resource2"};
 
     EXPECT_FALSE(_a == _b);
 }
