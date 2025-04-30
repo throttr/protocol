@@ -62,3 +62,5 @@ if (BUILD_TESTS)
     include(GoogleTest)
     gtest_discover_tests(throttr-protocol-tests)
 endif()
+
+add_library(throttr::protocol ALIAS throttr-protocol)
