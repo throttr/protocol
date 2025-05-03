@@ -117,7 +117,7 @@ namespace throttr {
     /**
      * Request insert header size
      */
-    constexpr std::size_t request_insert_header_size = 28;
+    constexpr std::size_t request_insert_header_size = 32;
 
     /**
      * Request insert header
@@ -127,6 +127,11 @@ namespace throttr {
          * Request type
          */
         request_types request_type_;
+
+        /**
+         * Request ID
+         */
+        uint32_t request_id_;
 
         /**
          * Quota
@@ -164,7 +169,7 @@ namespace throttr {
     /**
      * Request query header size
      */
-    constexpr std::size_t request_query_header_size = 3;
+    constexpr std::size_t request_query_header_size = 7;
 
     /**
      * Request query header
@@ -174,6 +179,11 @@ namespace throttr {
          * Request type
          */
         request_types request_type_;
+
+        /**
+         * Request ID
+         */
+        uint32_t request_id_;
 
         /**
          * Consumer ID size
@@ -192,7 +202,7 @@ namespace throttr {
     /**
      * Request update header size
      */
-    constexpr std::size_t request_update_header_size = 13;
+    constexpr std::size_t request_update_header_size = 17;
 
     /**
      * Request update header
@@ -202,6 +212,11 @@ namespace throttr {
          * Request type
          */
         request_types request_type_;
+
+        /**
+         * Request ID
+         */
+        uint32_t request_id_;
 
         /**
          * Attribute
@@ -236,7 +251,7 @@ namespace throttr {
     /**
      * Request purge header size
      */
-    constexpr std::size_t request_purge_header_size = 3;
+    constexpr std::size_t request_purge_header_size = 7;
 
     /**
      * Request purge header
@@ -246,6 +261,11 @@ namespace throttr {
          * Request type
          */
         request_types request_type_;
+
+        /**
+         * Request ID
+         */
+        uint32_t request_id_;
 
         /**
          * Consumer ID size
@@ -592,6 +612,7 @@ namespace throttr {
     /**
      * Request insert builder
      *
+     * @param id
      * @param quota
      * @param usage
      * @param ttl_type
@@ -601,6 +622,7 @@ namespace throttr {
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_insert_builder(
+        const uint32_t id = 0,
         const uint64_t quota = 0,
         const uint64_t usage = 0,
         const ttl_types ttl_type = ttl_types::milliseconds,
@@ -613,6 +635,7 @@ namespace throttr {
 
         auto *_header = reinterpret_cast<request_insert_header *>(_buffer.data()); // NOSONAR
         _header->request_type_ = request_types::insert;
+        _header->request_id_ = id;
         _header->quota_ = quota;
         _header->usage_ = usage;
         _header->ttl_type_ = ttl_type;
@@ -630,11 +653,13 @@ namespace throttr {
     /**
      * Request query builder
      *
+     * @param id
      * @param consumer_id
      * @param resource_id
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_query_builder(
+        const uint32_t id = 0,
         const std::string_view consumer_id = "",
         const std::string_view resource_id = ""
     ) {
@@ -643,6 +668,7 @@ namespace throttr {
 
         auto *_header = reinterpret_cast<request_query_header *>(_buffer.data()); // NOSONAR
         _header->request_type_ = request_types::query;
+        _header->request_id_ = id;
         _header->consumer_id_size_ = static_cast<uint8_t>(consumer_id.size());
         _header->resource_id_size_ = static_cast<uint8_t>(resource_id.size());
 
@@ -657,11 +683,13 @@ namespace throttr {
     /**
      * Request purge builder
      *
+     * @param id
      * @param consumer_id
      * @param resource_id
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_purge_builder(
+        const uint32_t id = 0,
         const std::string_view consumer_id = "",
         const std::string_view resource_id = ""
     ) {
@@ -670,6 +698,7 @@ namespace throttr {
 
         auto *_header = reinterpret_cast<request_purge_header *>(_buffer.data()); // NOSONAR
         _header->request_type_ = request_types::purge;
+        _header->request_id_ = id;
         _header->consumer_id_size_ = static_cast<uint8_t>(consumer_id.size());
         _header->resource_id_size_ = static_cast<uint8_t>(resource_id.size());
 
@@ -683,6 +712,7 @@ namespace throttr {
     /**
      * Request update builder
      *
+     * @param id
      * @param attribute
      * @param change
      * @param value
@@ -691,6 +721,7 @@ namespace throttr {
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_update_builder(
+        const uint32_t id = 0,
         const attribute_types attribute = attribute_types::quota,
         const change_types change = change_types::patch,
         const uint64_t value = 0,
@@ -702,6 +733,7 @@ namespace throttr {
 
         auto *_header = reinterpret_cast<request_update_header *>(_buffer.data()); // NOSONAR
         _header->request_type_ = request_types::update;
+        _header->request_id_ = id;
         _header->attribute_ = attribute;
         _header->change_ = change;
         _header->value_ = value;
