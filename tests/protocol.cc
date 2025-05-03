@@ -23,7 +23,7 @@ using namespace std::chrono;
 
 TEST(RequestInsertTest, ParseAndSerialize) {
     auto _buffer = request_insert_builder(
-        5000, 5, ttl_types::milliseconds, 60000, "consumer123", "/api/resource"
+        0, 5000, 5, ttl_types::milliseconds, 60000, "consumer123", "/api/resource"
     );
 
     const auto _request = request_insert::from_buffer(_buffer);
@@ -40,7 +40,7 @@ TEST(RequestInsertTest, ParseAndSerialize) {
 }
 
 TEST(RequestQueryTest, ParseAndSerialize) {
-    auto _buffer = request_query_builder("consumerABC", "/resourceXYZ");
+    auto _buffer = request_query_builder(0, "consumerABC", "/resourceXYZ");
 
     const auto _request = request_query::from_buffer(_buffer);
     EXPECT_EQ(_request.consumer_id_, "consumerABC");
@@ -63,7 +63,7 @@ TEST(RequestQueryTest, RejectsTooSmallBuffer) {
 
 TEST(RequestInsertBenchmark, DecodePerformance) {
     auto _buffer = request_insert_builder(
-        5000, 5, ttl_types::milliseconds, 60000, "consumer123", "/api/benchmark"
+        0, 5000, 5, ttl_types::milliseconds, 60000, "consumer123", "/api/benchmark"
     );
 
     constexpr size_t _iterations = 100'000'000;
@@ -83,7 +83,7 @@ TEST(RequestInsertBenchmark, DecodePerformance) {
 
 TEST(RequestQueryBenchmark, DecodePerformance) {
     auto _buffer = request_query_builder(
-        "consumerABC", "/api/query"
+        0, "consumerABC", "/api/query"
     );
 
     constexpr size_t _iterations = 100'000'000;
@@ -129,7 +129,7 @@ TEST(RequestQueryTest, RejectsInvalidPayloadSize) {
 
 TEST(RequestUpdateTest, ParseAndSerialize) {
     auto _buffer = request_update_builder(
-        attribute_types::quota, change_types::patch, 5000, "consumerX", "/resourceX"
+        0, attribute_types::quota, change_types::patch, 5000, "consumerX", "/resourceX"
     );
 
     const auto _request = request_update::from_buffer(_buffer);
@@ -164,7 +164,7 @@ TEST(RequestUpdateTest, RejectsInvalidPayloadSize) {
 }
 
 TEST(RequestPurgeTest, ParseAndSerialize) {
-    auto _buffer = request_purge_builder("consumerPURGE", "/resourcePURGE");
+    auto _buffer = request_purge_builder(0, "consumerPURGE", "/resourcePURGE");
 
     const auto _request = request_purge::from_buffer(_buffer);
     EXPECT_EQ(_request.consumer_id_, "consumerPURGE");
@@ -174,6 +174,25 @@ TEST(RequestPurgeTest, ParseAndSerialize) {
     ASSERT_EQ(_reconstructed.size(), _buffer.size());
     ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
 }
+
+TEST(Requests, ContainsIdentification) {
+    auto _insert_buffer = request_insert_builder(1, 0, 0, ttl_types::milliseconds, 100, "insert", "/insert");
+    const auto _insert_request = request_insert::from_buffer(_insert_buffer);
+    EXPECT_EQ(_insert_request.header_->request_id_, 1);
+
+    auto _query_buffer = request_query_builder(2, "query", "/query");
+    const auto _query_request = request_query::from_buffer(_query_buffer);
+    EXPECT_EQ(_query_request.header_->request_id_, 2);
+
+    auto _update_buffer = request_update_builder(3, attribute_types::quota, change_types::increase, 5, "update", "/update");
+    const auto _update_request = request_update::from_buffer(_update_buffer);
+    EXPECT_EQ(_update_request.header_->request_id_, 3);
+
+    auto _purge_buffer = request_purge_builder(4, "purge", "/purge");
+    const auto _purge_request = request_purge::from_buffer(_purge_buffer);
+    EXPECT_EQ(_purge_request.header_->request_id_, 4);
+}
+
 
 TEST(RequestPurgeTest, RejectsTooSmallBuffer) {
     std::vector _buffer(2, static_cast<std::byte>(0));
