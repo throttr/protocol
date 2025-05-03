@@ -114,10 +114,6 @@ namespace throttr {
 
 
 #pragma pack(push, 1)
-    /**
-     * Request insert header size
-     */
-    constexpr std::size_t request_insert_header_size = 32;
 
     /**
      * Request insert header
@@ -126,50 +122,46 @@ namespace throttr {
         /**
          * Request type
          */
-        request_types request_type_;
+        request_types request_type_; // 1 byte
 
         /**
          * Request ID
          */
-        uint32_t request_id_;
+        uint32_t request_id_; // 4 bytes
 
         /**
          * Quota
          */
-        uint64_t quota_;
-
-        /**
-         * Usage
-         */
-        uint64_t usage_;
+        uint64_t quota_; // 8 bytes
 
         /**
          * TTL type
          */
-        ttl_types ttl_type_;
+        ttl_types ttl_type_; // 1 byte
 
         /**
          * TTL
          */
-        uint64_t ttl_;
+        uint64_t ttl_; // 8 bytes
 
         /**
          * Consumer ID size
          */
-        uint8_t consumer_id_size_;
+        uint8_t consumer_id_size_; // 1 byte
 
         /**
          * Resource ID size
          */
-        uint8_t resource_id_size_;
+        uint8_t resource_id_size_; // 1 byte
     };
 #pragma pack(pop)
 
-#pragma pack(push, 1)
     /**
-     * Request query header size
+     * Request insert header size
      */
-    constexpr std::size_t request_query_header_size = 7;
+    constexpr std::size_t request_insert_header_size = sizeof(request_insert_header);
+
+#pragma pack(push, 1)
 
     /**
      * Request query header
@@ -178,31 +170,31 @@ namespace throttr {
         /**
          * Request type
          */
-        request_types request_type_;
+        request_types request_type_; // 1 byte
 
         /**
          * Request ID
          */
-        uint32_t request_id_;
+        uint32_t request_id_; // 4 bytes
 
         /**
          * Consumer ID size
          */
-        uint8_t consumer_id_size_;
+        uint8_t consumer_id_size_; // 1 byte
 
         /**
          * Resource ID size
          */
-        uint8_t resource_id_size_;
+        uint8_t resource_id_size_; // 1 byte
     };
 #pragma pack(pop)
 
+    /**
+     * Request query header size
+     */
+    constexpr std::size_t request_query_header_size = sizeof(request_query_header);
 
 #pragma pack(push, 1)
-    /**
-     * Request update header size
-     */
-    constexpr std::size_t request_update_header_size = 17;
 
     /**
      * Request update header
@@ -245,13 +237,13 @@ namespace throttr {
     };
 #pragma pack(pop)
 
+    /**
+     * Request update header size
+     */
+    constexpr std::size_t request_update_header_size = sizeof(request_update_header);
 
 
 #pragma pack(push, 1)
-    /**
-     * Request purge header size
-     */
-    constexpr std::size_t request_purge_header_size = 7;
 
     /**
      * Request purge header
@@ -278,6 +270,11 @@ namespace throttr {
         uint8_t resource_id_size_;
     };
 #pragma pack(pop)
+
+    /**
+     * Request purge header size
+     */
+    constexpr std::size_t request_purge_header_size = sizeof(request_purge_header);
 
     /**
      * Request insert
@@ -614,7 +611,6 @@ namespace throttr {
      *
      * @param id
      * @param quota
-     * @param usage
      * @param ttl_type
      * @param ttl
      * @param consumer_id
@@ -624,7 +620,6 @@ namespace throttr {
     inline std::vector<std::byte> request_insert_builder(
         const uint32_t id = 0,
         const uint64_t quota = 0,
-        const uint64_t usage = 0,
         const ttl_types ttl_type = ttl_types::milliseconds,
         const uint64_t ttl = 0,
         const std::string_view consumer_id = "",
@@ -637,7 +632,6 @@ namespace throttr {
         _header->request_type_ = request_types::insert;
         _header->request_id_ = id;
         _header->quota_ = quota;
-        _header->usage_ = usage;
         _header->ttl_type_ = ttl_type;
         _header->ttl_ = ttl;
         _header->consumer_id_size_ = static_cast<uint8_t>(consumer_id.size());

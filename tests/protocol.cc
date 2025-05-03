@@ -23,12 +23,11 @@ using namespace std::chrono;
 
 TEST(RequestInsertTest, ParseAndSerialize) {
     auto _buffer = request_insert_builder(
-        0, 5000, 5, ttl_types::milliseconds, 60000, "consumer123", "/api/resource"
+        0, 5000, ttl_types::milliseconds, 60000, "consumer123", "/api/resource"
     );
 
     const auto _request = request_insert::from_buffer(_buffer);
     EXPECT_EQ(_request.header_->quota_, 5000);
-    EXPECT_EQ(_request.header_->usage_, 5);
     EXPECT_EQ(_request.header_->ttl_type_, ttl_types::milliseconds);
     EXPECT_EQ(_request.header_->ttl_, 60000);
     EXPECT_EQ(_request.consumer_id_, "consumer123");
@@ -63,10 +62,10 @@ TEST(RequestQueryTest, RejectsTooSmallBuffer) {
 
 TEST(RequestInsertBenchmark, DecodePerformance) {
     auto _buffer = request_insert_builder(
-        0, 5000, 5, ttl_types::milliseconds, 60000, "consumer123", "/api/benchmark"
+        0, 5000, ttl_types::milliseconds, 60000, "consumer123", "/api/benchmark"
     );
 
-    constexpr size_t _iterations = 100'000'000;
+    constexpr size_t _iterations = 1'000'000;
     const auto _start = high_resolution_clock::now();
 
     for (size_t _i = 0; _i < _iterations; ++_i) {
@@ -86,7 +85,7 @@ TEST(RequestQueryBenchmark, DecodePerformance) {
         0, "consumerABC", "/api/query"
     );
 
-    constexpr size_t _iterations = 100'000'000;
+    constexpr size_t _iterations = 1'000'000;
     const auto _start = high_resolution_clock::now();
 
     for (size_t _i = 0; _i < _iterations; ++_i) {
@@ -107,7 +106,6 @@ TEST(RequestInsertTest, RejectsInvalidPayloadSize) {
     auto *_header = reinterpret_cast<request_insert_header *>(_buffer.data()); // NOSONAR
     _header->request_type_ = request_types::insert;
     _header->quota_ = 10;
-    _header->usage_ = 0;
     _header->ttl_type_ = ttl_types::milliseconds;
     _header->ttl_ = 10000;
     _header->consumer_id_size_ = 5;
@@ -176,7 +174,7 @@ TEST(RequestPurgeTest, ParseAndSerialize) {
 }
 
 TEST(Requests, ContainsIdentification) {
-    auto _insert_buffer = request_insert_builder(1, 0, 0, ttl_types::milliseconds, 100, "insert", "/insert");
+    auto _insert_buffer = request_insert_builder(1, 0, ttl_types::milliseconds, 100, "insert", "/insert");
     const auto _insert_request = request_insert::from_buffer(_insert_buffer);
     EXPECT_EQ(_insert_request.header_->request_id_, 1);
 

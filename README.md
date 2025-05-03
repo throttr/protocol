@@ -48,8 +48,8 @@
 | Field              | Type       | Size    | Description                        |
 |:-------------------|:-----------|:--------|:-----------------------------------|
 | `request_type`     | `uint8_t`  | 1 byte  | Always 0x01 for insert.            |
+| `request_id`       | `uint32_t` | 4 bytes | Request ID.                        |
 | `quota`            | `uint64_t` | 8 bytes | Maximum number of allowed actions. |
-| `usage`            | `uint64_t` | 8 bytes | Initial usage.                     |
 | `ttl_type`         | `uint8_t`  | 1 byte  | 0 = ns, 1 = ms, 2 = s.             |
 | `ttl`              | `uint64_t` | 8 bytes | Time to live value.                |
 | `consumer_id_size` | `uint8_t`  | 1 byte  | Size of Consumer ID.               |
@@ -59,19 +59,21 @@
 
 ### 🔍 Query and 🧹 Purge Request Format
 
-| Field              | Type      | Size    | Description                       |
-|:-------------------|:----------|:--------|:----------------------------------|
-| `request_type`     | `uint8_t` | 1 byte  | 0x02 for query and 0x04 on purge. |
-| `consumer_id_size` | `uint8_t` | 1 byte  | Size of Consumer ID.              |
-| `resource_id_size` | `uint8_t` | 1 byte  | Size of Resource ID.              |
-| `consumer_id`      | `char[N]` | N bytes | Consumer identifier.              |
-| `resource_id`      | `char[M]` | M bytes | Resource identifier.              |
+| Field              | Type       | Size    | Description                       |
+|:-------------------|:-----------|:--------|:----------------------------------|
+| `request_type`     | `uint8_t`  | 1 byte  | 0x02 for query and 0x04 on purge. |
+| `request_id`       | `uint32_t` | 4 bytes | Request ID.                       |
+| `consumer_id_size` | `uint8_t`  | 1 byte  | Size of Consumer ID.              |
+| `resource_id_size` | `uint8_t`  | 1 byte  | Size of Resource ID.              |
+| `consumer_id`      | `char[N]`  | N bytes | Consumer identifier.              |
+| `resource_id`      | `char[M]`  | M bytes | Resource identifier.              |
 
 ### ♻️ Update Request Format
 
 | Field              | Type       | Size    | Description                             |
 |:-------------------|:-----------|:--------|:----------------------------------------|
 | `request_type`     | `uint8_t`  | 1 byte  | Always 0x03 for update.                 |
+| `request_id`       | `uint32_t` | 4 bytes | Request ID.                             |
 | `attribute`        | `uint8_t`  | 1 byte  | 0 = quota, 1 = ttl.                     |
 | `change`           | `uint8_t`  | 1 byte  | 0 = patch, 1 = increase, 2 = decrease.  |
 | `value`            | `uint64_t` | 8 bytes | Value to apply according to the change. |
@@ -82,16 +84,15 @@
 
 ### 📦 Response Format
 
-Server responds always with 18 bytes for Insert and Query:
+Server on almost cases should respond with 5 bytes `Request ID` +  `0x00 or 0x01` (failure or success).
 
-| Field             | Type       | Size    | Description                                  |
-|:------------------|:-----------|:--------|:---------------------------------------------|
-| `can`             | `uint8_t`  | 1 byte  | 1 if successful, 0 otherwise.                |
-| `quota_remaining` | `uint64_t` | 8 bytes | Remaining available quota.                   |
-| `ttl_type`        | `uint8_t`  | 1 byte  | 0 = ns, 1 = ms, 2 = s.                       |
-| `ttl_remaining`   | `int64_t`  | 8 bytes | Remaining TTL (ns/ms/s according to config). |
+If the hash generated based on `consumer + resource` exists then **Query** will respond with extra fields:
 
-Also, it will respond 1 byte (0 or 1) if the Purge or Update was success.
+| Field      | Type       | Size    | Description            |
+|:-----------|:-----------|:--------|:-----------------------|
+| `quota`    | `uint64_t` | 8 bytes | Available quota.       |
+| `ttl_type` | `uint8_t`  | 1 byte  | 0 = ns, 1 = ms, 2 = s. |
+| `ttl`      | `uint64_t` | 8 bytes | Time to expire.        |
 
 
 ### ⚖️ License
