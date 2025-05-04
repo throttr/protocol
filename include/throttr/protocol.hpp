@@ -566,7 +566,9 @@ namespace throttr {
          * @param other
          * @return bool
          */
-        bool operator==(const request_key &other) const = default;
+        bool operator==(const request_key &other) const {
+            return consumer_id_ == other.consumer_id_ && resource_id_ == other.resource_id_;
+        };
     };
 
     /**

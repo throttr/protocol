@@ -240,3 +240,22 @@ TEST(RequestKeyTest, NotEqualsDifferentBothFields) {
 
     EXPECT_FALSE(_a == _b);
 }
+
+TEST(RequestKeyTest, ComparesByContentNotPointer) {
+    const std::string base1 = "consumerA";
+    const std::string base2 = "consumerA"; // Distinto objeto, mismo contenido
+    const std::string base3 = "consumerB";
+
+    const std::string path1 = "/resourceX";
+    const std::string path2 = "/resourceX"; // Mismo contenido
+    const std::string path3 = "/resourceY";
+
+    request_key key1{std::string_view(base1), std::string_view(path1)};
+    request_key key2{std::string_view(base2), std::string_view(path2)};
+    request_key key3{std::string_view(base3), std::string_view(path1)};
+    request_key key4{std::string_view(base1), std::string_view(path3)};
+
+    EXPECT_TRUE(key1 == key2);
+    EXPECT_FALSE(key1 == key3);
+    EXPECT_FALSE(key1 == key4);
+}
