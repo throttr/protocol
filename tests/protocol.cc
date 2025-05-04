@@ -259,3 +259,26 @@ TEST(RequestKeyTest, ComparesByContentNotPointer) {
     EXPECT_FALSE(key1 == key3);
     EXPECT_FALSE(key1 == key4);
 }
+
+TEST(RequestKeyHasherTest, ProducesSameHashForEquivalentKeys) {
+    const std::string a = "consumerZ";
+    const std::string b = "/resourceZ";
+
+    request_key key1{std::string_view(a), std::string_view(b)};
+    request_key key2{std::string_view("consumerZ"), std::string_view("/resourceZ")};
+
+    request_key_hasher hasher;
+
+    EXPECT_EQ(hasher(key1), hasher(key2));
+}
+
+TEST(RequestKeyHasherTest, ProducesDifferentHashForDifferentKeys) {
+    request_key_hasher hasher;
+
+    request_key k1{"A", "X"};
+    request_key k2{"B", "X"};
+    request_key k3{"A", "Y"};
+
+    EXPECT_NE(hasher(k1), hasher(k2));
+    EXPECT_NE(hasher(k1), hasher(k3));
+}
