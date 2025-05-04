@@ -22,7 +22,7 @@
 
 ## 🪐 About
 
-**Throttr** defines a minimal, efficient binary protocol based on three main request types:
+**Throttr** defines a minimal, lightweight and efficient binary protocol based on request types:
 
 - Insert Request
 - Query Request
@@ -31,12 +31,10 @@
 
 # 📚 Concepts to Understand the Throttr Protocol
 
-- **Consumer**: An entity (user, client, device, session, or any identifier like UUID, hash, or IP) that is subject to traffic or quota control.
-- **Resource**: A target associated with a consumer. It can represent anything: an API endpoint, a file, a user ID, a service, or any abstract entity.
+- **Key**: An value that represents the unique thing that you'll do throttling.
 - **Quota**: The maximum number of allowed operations (requests, actions, accesses) a consumer can perform on a resource during a valid TTL period.
-- **Usage**: The amount deducted from the available quota with each request. Usually `1`, but can represent batched or weighted operations.
 - **TTL (Time To Live)**: The lifetime duration (in nanoseconds, milliseconds, or seconds) during which a quota remains valid before it expires and resets.
-- **TTL Type**: Defines the unit used for the TTL: nanoseconds (`ns`), milliseconds (`ms`), or seconds (`s`).
+- **TTL Type**: Defines the unit used for the TTL: nanoseconds (`ns`), milliseconds (`ms`), seconds (`s`), minutes (`m`) and [more](./include/throttr/protocol.hpp#L63).
 - **Expires At**: The absolute expiration timestamp, calculated from the TTL and the time of insertion or update.
 - **Request Insert**: Operation that creates or resets a quota and TTL for a specific consumer-resource pair.
 - **Request Query**: Operation that retrieves the current quota and TTL without modifying any data.
@@ -45,55 +43,45 @@
 
 ### 📥 Insert Request Format
 
-| Field              | Type       | Size    | Description                        |
-|:-------------------|:-----------|:--------|:-----------------------------------|
-| `request_type`     | `uint8_t`  | 1 byte  | Always 0x01 for insert.            |
-| `request_id`       | `uint32_t` | 4 bytes | Request ID.                        |
-| `quota`            | `uint64_t` | 8 bytes | Maximum number of allowed actions. |
-| `ttl_type`         | `uint8_t`  | 1 byte  | 0 = ns, 1 = ms, 2 = s.             |
-| `ttl`              | `uint64_t` | 8 bytes | Time to live value.                |
-| `consumer_id_size` | `uint8_t`  | 1 byte  | Size of Consumer ID.               |
-| `resource_id_size` | `uint8_t`  | 1 byte  | Size of Resource ID.               |
-| `consumer_id`      | `char[N]`  | N bytes | Consumer identifier.               |
-| `resource_id`      | `char[M]`  | M bytes | Resource identifier.               |
+| Field          | Type       | Size    | Description                                            |
+|:---------------|:-----------|:--------|:-------------------------------------------------------|
+| `request_type` | `uint8_t`  | 1 byte  | Always 0x01 for insert.                                |
+| `quota`        | `uint16_t` | 2 bytes | Maximum number of allowed actions.                     |
+| `ttl_type`     | `uint8_t`  | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
+| `ttl`          | `uint16_t` | 2 bytes | Time to live value.                                    |
+| `key_size`     | `uint8_t`  | 1 byte  | Size of key.                                           |
+| `key`          | `char[N]`  | N bytes | Key.                                                   |
 
 ### 🔍 Query and 🧹 Purge Request Format
 
-| Field              | Type       | Size    | Description                       |
-|:-------------------|:-----------|:--------|:----------------------------------|
-| `request_type`     | `uint8_t`  | 1 byte  | 0x02 for query and 0x04 on purge. |
-| `request_id`       | `uint32_t` | 4 bytes | Request ID.                       |
-| `consumer_id_size` | `uint8_t`  | 1 byte  | Size of Consumer ID.              |
-| `resource_id_size` | `uint8_t`  | 1 byte  | Size of Resource ID.              |
-| `consumer_id`      | `char[N]`  | N bytes | Consumer identifier.              |
-| `resource_id`      | `char[M]`  | M bytes | Resource identifier.              |
+| Field          | Type       | Size    | Description                       |
+|:---------------|:-----------|:--------|:----------------------------------|
+| `request_type` | `uint8_t`  | 1 byte  | 0x02 for query and 0x04 on purge. |
+| `key_size`     | `uint8_t`  | 1 byte  | Size of key.                      |
+| `key`          | `char[N]`  | N bytes | Key.                              |
 
 ### ♻️ Update Request Format
 
-| Field              | Type       | Size    | Description                             |
-|:-------------------|:-----------|:--------|:----------------------------------------|
-| `request_type`     | `uint8_t`  | 1 byte  | Always 0x03 for update.                 |
-| `request_id`       | `uint32_t` | 4 bytes | Request ID.                             |
-| `attribute`        | `uint8_t`  | 1 byte  | 0 = quota, 1 = ttl.                     |
-| `change`           | `uint8_t`  | 1 byte  | 0 = patch, 1 = increase, 2 = decrease.  |
-| `value`            | `uint64_t` | 8 bytes | Value to apply according to the change. |
-| `consumer_id_size` | `uint8_t`  | 1 byte  | Size of Consumer ID.                    |
-| `resource_id_size` | `uint8_t`  | 1 byte  | Size of Resource ID.                    |
-| `consumer_id`      | `char[N]`  | N bytes | Consumer identifier.                    |
-| `resource_id`      | `char[M]`  | M bytes | Resource identifier.                    |
+| Field          | Type       | Size    | Description                             |
+|:---------------|:-----------|:--------|:----------------------------------------|
+| `request_type` | `uint8_t`  | 1 byte  | Always 0x03 for update.                 |
+| `attribute`    | `uint8_t`  | 1 byte  | 0 = quota, 1 = ttl.                     |
+| `change`       | `uint8_t`  | 1 byte  | 0 = patch, 1 = increase, 2 = decrease.  |
+| `value`        | `uint16_t` | 2 bytes | Value to apply according to the change. |
+| `key_size`     | `uint8_t`  | 1 byte  | Size of key.                            |
+| `key`          | `char[N]`  | N bytes | Key.                                    |
 
 ### 📦 Response Format
 
-Server on almost cases should respond with 5 bytes `Request ID` +  `0x00 or 0x01` (failure or success).
+Server on almost cases should respond with 1 byte `0x00 or 0x01` (failure or success).
 
-If the hash generated based on `consumer + resource` exists then **Query** will respond with extra fields:
+If the `key` exists then **Query** will respond with extra fields (5 bytes):
 
-| Field      | Type       | Size    | Description            |
-|:-----------|:-----------|:--------|:-----------------------|
-| `quota`    | `uint64_t` | 8 bytes | Available quota.       |
-| `ttl_type` | `uint8_t`  | 1 byte  | 0 = ns, 1 = ms, 2 = s. |
-| `ttl`      | `uint64_t` | 8 bytes | Time to expire.        |
-
+| Field      | Type       | Size    | Description                                            |
+|:-----------|:-----------|:--------|:-------------------------------------------------------|
+| `quota`    | `uint16_t` | 2 bytes | Available quota.                                       |
+| `ttl_type` | `uint8_t`  | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
+| `ttl`      | `uint16_t` | 2 bytes | Time to expire.                                        |
 
 ### ⚖️ License
 

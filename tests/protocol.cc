@@ -22,16 +22,13 @@ using namespace throttr;
 using namespace std::chrono;
 
 TEST(RequestInsertTest, ParseAndSerialize) {
-    auto _buffer = request_insert_builder(
-        0, 5000, ttl_types::milliseconds, 60000, "consumer123", "/api/resource"
-    );
+    auto _buffer = request_insert_builder(5000, ttl_types::milliseconds, 60000, "127.0.0.1:8000/api/resource");
 
     const auto _request = request_insert::from_buffer(_buffer);
     EXPECT_EQ(_request.header_->quota_, 5000);
     EXPECT_EQ(_request.header_->ttl_type_, ttl_types::milliseconds);
     EXPECT_EQ(_request.header_->ttl_, 60000);
-    EXPECT_EQ(_request.consumer_id_, "consumer123");
-    EXPECT_EQ(_request.resource_id_, "/api/resource");
+    EXPECT_EQ(_request.key_, "127.0.0.1:8000/api/resource");
 
     auto _reconstructed = _request.to_buffer();
     ASSERT_EQ(_reconstructed.size(), _buffer.size());
@@ -39,11 +36,10 @@ TEST(RequestInsertTest, ParseAndSerialize) {
 }
 
 TEST(RequestQueryTest, ParseAndSerialize) {
-    auto _buffer = request_query_builder(0, "consumerABC", "/resourceXYZ");
+    auto _buffer = request_query_builder("0fa80d9d-d371-4f16-9c50-1bfa13f199b5");
 
     const auto _request = request_query::from_buffer(_buffer);
-    EXPECT_EQ(_request.consumer_id_, "consumerABC");
-    EXPECT_EQ(_request.resource_id_, "/resourceXYZ");
+    EXPECT_EQ(_request.key_, "0fa80d9d-d371-4f16-9c50-1bfa13f199b5");
 
     auto _reconstructed = _request.to_buffer();
     ASSERT_EQ(_reconstructed.size(), _buffer.size());
@@ -56,14 +52,12 @@ TEST(RequestInsertTest, RejectsTooSmallBuffer) {
 }
 
 TEST(RequestQueryTest, RejectsTooSmallBuffer) {
-    std::vector _buffer(2, static_cast<std::byte>(0));
+    std::vector _buffer(1, static_cast<std::byte>(0));
     ASSERT_THROW(request_query::from_buffer(_buffer), request_error);
 }
 
 TEST(RequestInsertBenchmark, DecodePerformance) {
-    auto _buffer = request_insert_builder(
-        0, 5000, ttl_types::milliseconds, 60000, "consumer123", "/api/benchmark"
-    );
+    auto _buffer = request_insert_builder(5000, ttl_types::milliseconds, 60000, "benchmark");
 
     constexpr size_t _iterations = 1'000'000;
     const auto _start = high_resolution_clock::now();
@@ -81,16 +75,14 @@ TEST(RequestInsertBenchmark, DecodePerformance) {
 }
 
 TEST(RequestQueryBenchmark, DecodePerformance) {
-    auto _buffer = request_query_builder(
-        0, "consumerABC", "/api/query"
-    );
+    auto _buffer = request_query_builder("benchmark");
 
     constexpr size_t _iterations = 1'000'000;
     const auto _start = high_resolution_clock::now();
 
     for (size_t _i = 0; _i < _iterations; ++_i) {
         auto _view = request_query::from_buffer(_buffer);
-        EXPECT_EQ(_view.consumer_id_, "consumerABC");
+        EXPECT_EQ(_view.key_, "benchmark");
     }
 
     const auto _end = high_resolution_clock::now();
@@ -101,41 +93,36 @@ TEST(RequestQueryBenchmark, DecodePerformance) {
 }
 
 TEST(RequestInsertTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_insert_header_size + 5);
+    std::vector<std::byte> _buffer(request_insert_header_size + 3);
 
     auto *_header = reinterpret_cast<request_insert_header *>(_buffer.data()); // NOSONAR
     _header->request_type_ = request_types::insert;
     _header->quota_ = 10;
     _header->ttl_type_ = ttl_types::milliseconds;
     _header->ttl_ = 10000;
-    _header->consumer_id_size_ = 5;
-    _header->resource_id_size_ = 5;
+    _header->key_size_ = 5;
 
     ASSERT_THROW(request_insert::from_buffer(_buffer), request_error);
 }
 
 TEST(RequestQueryTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_query_header_size + 5);
+    std::vector<std::byte> _buffer(request_query_header_size + 3);
 
     auto *_header = reinterpret_cast<request_query_header *>(_buffer.data()); // NOSONAR
     _header->request_type_ = request_types::query;
-    _header->consumer_id_size_ = 5;
-    _header->resource_id_size_ = 5;
+    _header->key_size_ = 5;
 
     ASSERT_THROW(request_query::from_buffer(_buffer), request_error);
 }
 
 TEST(RequestUpdateTest, ParseAndSerialize) {
-    auto _buffer = request_update_builder(
-        0, attribute_types::quota, change_types::patch, 5000, "consumerX", "/resourceX"
-    );
+    auto _buffer = request_update_builder(attribute_types::quota, change_types::patch, 5000, "x");
 
     const auto _request = request_update::from_buffer(_buffer);
     EXPECT_EQ(_request.header_->attribute_, attribute_types::quota);
     EXPECT_EQ(_request.header_->change_, change_types::patch);
     EXPECT_EQ(_request.header_->value_, 5000);
-    EXPECT_EQ(_request.consumer_id_, "consumerX");
-    EXPECT_EQ(_request.resource_id_, "/resourceX");
+    EXPECT_EQ(_request.key_, "x");
 
     auto _reconstructed = _request.to_buffer();
     ASSERT_EQ(_reconstructed.size(), _buffer.size());
@@ -148,95 +135,90 @@ TEST(RequestUpdateTest, RejectsTooSmallBuffer) {
 }
 
 TEST(RequestUpdateTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_update_header_size + 5);
+    std::vector<std::byte> _buffer(request_update_header_size + 3);
 
     auto *_header = reinterpret_cast<request_update_header *>(_buffer.data()); // NOSONAR
     _header->request_type_ = request_types::update;
     _header->attribute_ = attribute_types::quota;
     _header->change_ = change_types::patch;
     _header->value_ = 5000;
-    _header->consumer_id_size_ = 5;
-    _header->resource_id_size_ = 5;
+    _header->key_size_ = 5;
 
     ASSERT_THROW(request_update::from_buffer(_buffer), request_error);
 }
 
 TEST(RequestPurgeTest, ParseAndSerialize) {
-    auto _buffer = request_purge_builder(0, "consumerPURGE", "/resourcePURGE");
+    auto _buffer = request_purge_builder("v5");
 
     const auto _request = request_purge::from_buffer(_buffer);
-    EXPECT_EQ(_request.consumer_id_, "consumerPURGE");
-    EXPECT_EQ(_request.resource_id_, "/resourcePURGE");
+    EXPECT_EQ(_request.key_, "v5");
 
     auto _reconstructed = _request.to_buffer();
     ASSERT_EQ(_reconstructed.size(), _buffer.size());
     ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
 }
 
-TEST(Requests, ContainsIdentification) {
-    auto _insert_buffer = request_insert_builder(1, 0, ttl_types::milliseconds, 100, "insert", "/insert");
-    const auto _insert_request = request_insert::from_buffer(_insert_buffer);
-    EXPECT_EQ(_insert_request.header_->request_id_, 1);
-
-    auto _query_buffer = request_query_builder(2, "query", "/query");
-    const auto _query_request = request_query::from_buffer(_query_buffer);
-    EXPECT_EQ(_query_request.header_->request_id_, 2);
-
-    auto _update_buffer = request_update_builder(3, attribute_types::quota, change_types::increase, 5, "update", "/update");
-    const auto _update_request = request_update::from_buffer(_update_buffer);
-    EXPECT_EQ(_update_request.header_->request_id_, 3);
-
-    auto _purge_buffer = request_purge_builder(4, "purge", "/purge");
-    const auto _purge_request = request_purge::from_buffer(_purge_buffer);
-    EXPECT_EQ(_purge_request.header_->request_id_, 4);
-}
-
-
 TEST(RequestPurgeTest, RejectsTooSmallBuffer) {
-    std::vector _buffer(2, static_cast<std::byte>(0));
+    std::vector _buffer(1, static_cast<std::byte>(0));
     ASSERT_THROW(request_purge::from_buffer(_buffer), request_error);
 }
 
 TEST(RequestPurgeTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_purge_header_size + 5);
+    std::vector<std::byte> _buffer(request_purge_header_size + 3);
 
     auto *_header = reinterpret_cast<request_purge_header *>(_buffer.data()); // NOSONAR
     _header->request_type_ = request_types::purge;
-    _header->consumer_id_size_ = 5;
-    _header->resource_id_size_ = 5;
+    _header->key_size_ = 5;
 
     ASSERT_THROW(request_purge::from_buffer(_buffer), request_error);
 }
 
 
 TEST(RequestKeyTest, EqualsIdenticalKeys) {
-    const request_key _a{"consumer1","/resource1"};
-
-    const request_key _b{"consumer1","/resource1"};
-
+    const request_key _a{"equals"};
+    const request_key _b{"equals"};
+    EXPECT_EQ(_a, _b);
     EXPECT_TRUE(_a == _b);
 }
 
-TEST(RequestKeyTest, NotEqualsDifferentConsumerID) {
-    const request_key _a{"consumer1","/resource1"};
-
-    const request_key _b{"consumer2","/resource1"};
-
+TEST(RequestKeyTest, NotEqualsDifferentKey) {
+    const request_key _a{"a"};
+    const request_key _b{"b"};
     EXPECT_FALSE(_a == _b);
 }
 
-TEST(RequestKeyTest, NotEqualsDifferentResourceID) {
-    const request_key _a{"consumer1","/resource1"};
+TEST(RequestKeyTest, ComparesByContentNotPointer) {
+    const std::string base1 = "consumerA";
+    const std::string base2 = "consumerA";
+    const std::string base3 = "consumerB";
 
-    const request_key _b{"consumer1","/resource2"};
+    const request_key key1{std::string_view(base1)};
+    const request_key key2{std::string_view(base2)};
+    const request_key key3{std::string_view(base3)};
 
-    EXPECT_FALSE(_a == _b);
+    EXPECT_TRUE(key1 == key2);
+    EXPECT_FALSE(key1 == key3);
 }
 
-TEST(RequestKeyTest, NotEqualsDifferentBothFields) {
-    const request_key _a{"consumer1", "/resource1"};
+TEST(RequestKeyHasherTest, ProducesSameHashForEquivalentKeys) {
+    const std::string a = "consumerZ";
+    const std::string b = "/resourceZ";
 
-    const request_key _b{"consumer2", "/resource2"};
+    const request_key key1{"a"};
+    const request_key key2{"a"};
 
-    EXPECT_FALSE(_a == _b);
+    constexpr request_key_hasher hasher;
+
+    EXPECT_EQ(hasher(key1), hasher(key2));
+}
+
+TEST(RequestKeyHasherTest, ProducesDifferentHashForDifferentKeys) {
+    constexpr request_key_hasher hasher;
+
+    const request_key k1{"a"};
+    const request_key k2{"b"};
+    const request_key k3{"c"};
+
+    EXPECT_NE(hasher(k1), hasher(k2));
+    EXPECT_NE(hasher(k1), hasher(k3));
 }
