@@ -64,32 +64,32 @@ namespace throttr {
         /**
          * Nanoseconds
          */
-        nanoseconds = 0x00,
+        nanoseconds = 0x01,
 
         /**
          * Microseconds
          */
-        microseconds = 0x01,
+        microseconds = 0x02,
 
         /**
          * Milliseconds
          */
-        milliseconds = 0x02,
+        milliseconds = 0x03,
 
         /**
          * Seconds
          */
-        seconds = 0x03,
+        seconds = 0x04,
 
         /**
          * Minutes
          */
-        minutes = 0x04,
+        minutes = 0x05,
 
         /**
          * Hours
          */
-        hours = 0x05,
+        hours = 0x06,
     };
 
     /**
@@ -137,27 +137,27 @@ namespace throttr {
         /**
          * Request type
          */
-        request_types request_type_; // 1 byte
+        request_types request_type_;
 
         /**
          * Quota
          */
-        uint16_t quota_; // 8 bytes
+        uint16_t quota_;
 
         /**
          * TTL type
          */
-        ttl_types ttl_type_; // 1 byte
+        ttl_types ttl_type_;
 
         /**
          * TTL
          */
-        uint16_t ttl_; // 8 bytes
+        uint16_t ttl_;
 
         /**
-         * Key ID size
+         * Key size
          */
-        uint8_t key_size_; // 1 byte
+        uint8_t key_size_;
     };
 #pragma pack(pop)
 
@@ -175,12 +175,12 @@ namespace throttr {
         /**
          * Request type
          */
-        request_types request_type_; // 1 byte
+        request_types request_type_;
 
         /**
-         * Key ID size
+         * Key size
          */
-        uint8_t key_size_; // 1 byte
+        uint8_t key_size_;
     };
 #pragma pack(pop)
 
@@ -216,9 +216,9 @@ namespace throttr {
         uint16_t value_;
 
         /**
-         * Key ID size
+         * Key size
          */
-        uint8_t key_size_; // 1 byte
+        uint8_t key_size_;
     };
 #pragma pack(pop)
 
@@ -240,9 +240,9 @@ namespace throttr {
         request_types request_type_;
 
         /**
-         * Key ID size
+         * Key size
          */
-        uint8_t key_size_; // 1 byte
+        uint8_t key_size_;
     };
 #pragma pack(pop)
 
@@ -317,7 +317,7 @@ namespace throttr {
         const request_query_header *header_ = nullptr;
 
         /**
-         * Key ID
+         * Key
          */
         std::string_view key_;
 
@@ -373,7 +373,7 @@ namespace throttr {
         const request_update_header *header_ = nullptr;
 
         /**
-         * Key ID
+         * Key
          */
         std::string_view key_;
 
@@ -430,7 +430,7 @@ namespace throttr {
         const request_purge_header *header_ = nullptr;
 
         /**
-         * Key ID
+         * Key
          */
         std::string_view key_;
 
@@ -482,7 +482,7 @@ namespace throttr {
      */
     struct request_key {
         /**
-         * Key ID
+         * Key
          */
         std::string_view key_;
 
