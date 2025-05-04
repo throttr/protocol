@@ -24,6 +24,10 @@
 #include <cstring>
 #include <vector>
 
+#ifndef THROTTR_VALUE_SIZE
+#define THROTTR_VALUE_SIZE uint16_t
+#endif
+
 namespace throttr {
     /**
      * Request error
@@ -142,7 +146,7 @@ namespace throttr {
         /**
          * Quota
          */
-        uint16_t quota_;
+        THROTTR_VALUE_SIZE quota_;
 
         /**
          * TTL type
@@ -152,7 +156,7 @@ namespace throttr {
         /**
          * TTL
          */
-        uint16_t ttl_;
+        THROTTR_VALUE_SIZE ttl_;
 
         /**
          * Key size
@@ -213,7 +217,7 @@ namespace throttr {
         /**
          * Value
          */
-        uint16_t value_;
+        THROTTR_VALUE_SIZE value_;
 
         /**
          * Key size
@@ -517,7 +521,7 @@ namespace throttr {
         /**
          * Quota
          */
-        uint16_t quota_ = 0;
+        THROTTR_VALUE_SIZE quota_ = 0;
 
         /**
          * TTL type
@@ -540,9 +544,9 @@ namespace throttr {
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_insert_builder(
-        const uint16_t quota = 0,
+        const THROTTR_VALUE_SIZE quota = 0,
         const ttl_types ttl_type = ttl_types::milliseconds,
-        const uint16_t ttl = 0,
+        const THROTTR_VALUE_SIZE ttl = 0,
         const std::string_view key = ""
     ) {
         std::vector<std::byte> _buffer;
@@ -615,7 +619,7 @@ namespace throttr {
     inline std::vector<std::byte> request_update_builder(
         const attribute_types attribute = attribute_types::quota,
         const change_types change = change_types::patch,
-        const uint16_t value = 0,
+        const THROTTR_VALUE_SIZE value = 0,
         const std::string_view key = ""
     ) {
         std::vector<std::byte> _buffer;
