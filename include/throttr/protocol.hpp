@@ -553,12 +553,12 @@ namespace throttr {
         /**
          * Consumer ID
          */
-        std::string consumer_id_;
+        std::string_view consumer_id_;
 
         /**
          * Resource ID
          */
-        std::string resource_id_;
+        std::string_view resource_id_;
 
         /**
          * Comparator
@@ -580,8 +580,8 @@ namespace throttr {
          * @return std::size_t
          */
         std::size_t operator()(const request_key &key) const {
-            std::size_t _h = std::hash<std::string>{}(key.consumer_id_);
-            _h ^= std::hash<std::string>{}(key.resource_id_) + 0x9e3779b9 + (_h << 6) + (_h >> 2);
+            std::size_t _h = std::hash<std::string_view>{}(key.consumer_id_);
+            _h ^= std::hash<std::string_view>{}(key.resource_id_) + 0x9e3779b9 + (_h << 6) + (_h >> 2);
             return _h;
         }
     };
