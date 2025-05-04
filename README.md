@@ -41,16 +41,20 @@
 - **Request Update**: Operation that patches, increases, or decreases the quota or TTL dynamically for a consumer-resource pair.
 - **Request Purge**: Operation that permanently deletes a consumer-resource pair from the state.
 
+## Requests
+
+> Consider that `THROTTR_VALUE_SIZE` is by default `uint16_t`.
+
 ### 📥 Insert Request Format
 
-| Field          | Type       | Size    | Description                                            |
-|:---------------|:-----------|:--------|:-------------------------------------------------------|
-| `request_type` | `uint8_t`  | 1 byte  | Always 0x01 for insert.                                |
-| `quota`        | `uint16_t` | 2 bytes | Maximum number of allowed actions.                     |
-| `ttl_type`     | `uint8_t`  | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
-| `ttl`          | `uint16_t` | 2 bytes | Time to live value.                                    |
-| `key_size`     | `uint8_t`  | 1 byte  | Size of key.                                           |
-| `key`          | `char[N]`  | N bytes | Key.                                                   |
+| Field          | Type                 | Size    | Description                                            |
+|:---------------|:---------------------|:--------|:-------------------------------------------------------|
+| `request_type` | `uint8_t`            | 1 byte  | Always 0x01 for insert.                                |
+| `quota`        | `THROTTR_VALUE_SIZE` | X bytes | Maximum number of allowed actions.                     |
+| `ttl_type`     | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
+| `ttl`          | `THROTTR_VALUE_SIZE` | X bytes | Time to live value.                                    |
+| `key_size`     | `uint8_t`            | 1 byte  | Size of key.                                           |
+| `key`          | `char[N]`            | N bytes | Key.                                                   |
 
 ### 🔍 Query and 🧹 Purge Request Format
 
@@ -62,14 +66,14 @@
 
 ### ♻️ Update Request Format
 
-| Field          | Type       | Size    | Description                             |
-|:---------------|:-----------|:--------|:----------------------------------------|
-| `request_type` | `uint8_t`  | 1 byte  | Always 0x03 for update.                 |
-| `attribute`    | `uint8_t`  | 1 byte  | 0 = quota, 1 = ttl.                     |
-| `change`       | `uint8_t`  | 1 byte  | 0 = patch, 1 = increase, 2 = decrease.  |
-| `value`        | `uint16_t` | 2 bytes | Value to apply according to the change. |
-| `key_size`     | `uint8_t`  | 1 byte  | Size of key.                            |
-| `key`          | `char[N]`  | N bytes | Key.                                    |
+| Field          | Type                 | Size    | Description                             |
+|:---------------|:---------------------|:--------|:----------------------------------------|
+| `request_type` | `uint8_t`            | 1 byte  | Always 0x03 for update.                 |
+| `attribute`    | `uint8_t`            | 1 byte  | 0 = quota, 1 = ttl.                     |
+| `change`       | `uint8_t`            | 1 byte  | 0 = patch, 1 = increase, 2 = decrease.  |
+| `value`        | `THROTTR_VALUE_SIZE` | X bytes | Value to apply according to the change. |
+| `key_size`     | `uint8_t`            | 1 byte  | Size of key.                            |
+| `key`          | `char[N]`            | N bytes | Key.                                    |
 
 ### 📦 Response Format
 
@@ -77,13 +81,13 @@ Server on almost cases should respond with 1 byte `0x00 or 0x01` (failure or suc
 
 If the `key` exists then **Query** will respond with extra fields (5 bytes):
 
-| Field      | Type       | Size    | Description                                            |
-|:-----------|:-----------|:--------|:-------------------------------------------------------|
-| `quota`    | `uint16_t` | 2 bytes | Available quota.                                       |
-| `ttl_type` | `uint8_t`  | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
-| `ttl`      | `uint16_t` | 2 bytes | Time to expire.                                        |
+| Field      | Type                 | Size    | Description                                            |
+|:-----------|:---------------------|:--------|:-------------------------------------------------------|
+| `quota`    | `THROTTR_VALUE_SIZE` | 2 bytes | Available quota.                                       |
+| `ttl_type` | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
+| `ttl`      | `THROTTR_VALUE_SIZE` | 2 bytes | Time to expire.                                        |
 
-### ⚖️ License
+## ⚖️ License
 
 This software has been built by **Ian Torres** and released using [GNU Affero General Public License](./LICENSE).
 
