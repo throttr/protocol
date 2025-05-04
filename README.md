@@ -83,9 +83,9 @@ If the `key` exists then **Query** will respond with extra fields (5 bytes):
 
 | Field      | Type                 | Size    | Description                                            |
 |:-----------|:---------------------|:--------|:-------------------------------------------------------|
-| `quota`    | `THROTTR_VALUE_SIZE` | 2 bytes | Available quota.                                       |
+| `quota`    | `THROTTR_VALUE_SIZE` | X bytes | Available quota.                                       |
 | `ttl_type` | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
-| `ttl`      | `THROTTR_VALUE_SIZE` | 2 bytes | Time to expire.                                        |
+| `ttl`      | `THROTTR_VALUE_SIZE` | X bytes | Time to expire.                                        |
 
 ## ⚖️ License
 
