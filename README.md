@@ -103,7 +103,7 @@ If the `key` exists then **Query** will respond with extra fields (N bytes):
 | `ttl_type` | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L95). |
 | `ttl`      | `THROTTR_VALUE_SIZE` | X bytes | Time to expire.                                        |
 
-If the `key` exists then **Value** will respond with extra fields (N bytes):
+If the `key` exists then **Get** will respond with extra fields (N bytes):
 
 | Field        | Type                 | Size    | Description                                            |
 |:-------------|:---------------------|:--------|:-------------------------------------------------------|
