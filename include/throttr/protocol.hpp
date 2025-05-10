@@ -872,7 +872,7 @@ namespace throttr {
         _header->ttl_type_ = ttl_type;
         _header->ttl_ = ttl;
         _header->key_size_ = static_cast<uint8_t>(key.size());
-        _header->value_size_ = static_cast<uint8_t>(buffer.size());
+        _header->value_size_ = static_cast<value_type>(buffer.size());
 
         std::memcpy(_buffer.data() + request_set_header_size, key.data(), key.size());
         std::memcpy(
