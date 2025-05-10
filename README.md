@@ -45,7 +45,7 @@
 
 ## Requests
 
-> Consider that `THROTTR_VALUE_SIZE` is by default `uint16_t`.
+> Consider that `THROTTR_VALUE_SIZE` is by default `uint16_t` (2 bytes).
 
 ### 📥 Insert Request Format
 
