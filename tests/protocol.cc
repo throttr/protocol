@@ -96,6 +96,11 @@ TEST(RequestGetTest, RejectsTooSmallBuffer) {
     ASSERT_THROW(request_get::from_buffer(_buffer), request_error);
 }
 
+TEST(RequestSetTest, RejectsTooSmallBuffer) {
+    std::vector _buffer(1, static_cast<std::byte>(0));
+    ASSERT_THROW(request_set::from_buffer(_buffer), request_error);
+}
+
 TEST(RequestInsertBenchmark, DecodePerformance) {
     auto _buffer = request_insert_builder(5000, ttl_types::milliseconds, 60000, "benchmark");
 
@@ -161,6 +166,29 @@ TEST(RequestInsertTest, RejectsInvalidPayloadSize) {
     _header->key_size_ = 5;
 
     ASSERT_THROW(request_insert::from_buffer(_buffer), request_error);
+}
+
+TEST(RequestSetTest, RejectsInvalidPayloadSize) {
+    std::vector<std::byte> _buffer(request_set_header_size + 3);
+
+    auto *_header = reinterpret_cast<request_set_header *>(_buffer.data()); // NOSONAR
+    _header->request_type_ = request_types::set;
+    _header->ttl_type_ = ttl_types::milliseconds;
+    _header->ttl_ = 10000;
+    _header->key_size_ = 20;
+    _header->value_size_ = 20;
+
+    ASSERT_THROW(request_set::from_buffer(_buffer), request_error);
+}
+
+TEST(RequestGetTest, RejectsInvalidPayloadSize) {
+    std::vector<std::byte> _buffer(request_get_header_size + 3);
+
+    auto *_header = reinterpret_cast<request_get_header *>(_buffer.data()); // NOSONAR
+    _header->request_type_ = request_types::get;
+    _header->key_size_ = 20;
+
+    ASSERT_THROW(request_get::from_buffer(_buffer), request_error);
 }
 
 TEST(RequestQueryTest, RejectsInvalidPayloadSize) {
