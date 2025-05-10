@@ -30,7 +30,7 @@ install(EXPORT throttr-protocolTargets
 
 write_basic_package_version_file(
         "${CMAKE_CURRENT_BINARY_DIR}/throttr-protocolConfigVersion.cmake"
-        VERSION 4.0.1
+        VERSION 4.0.2
         COMPATIBILITY SameMajorVersion
 )
 
@@ -54,6 +54,10 @@ if (BUILD_PROTOCOL_TESTS)
     file(GLOB_RECURSE TEST_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cc)
 
     add_executable(throttr-protocol-tests ${TEST_FILES})
+
+    target_compile_options(throttr-protocol-tests PRIVATE --coverage -O0 -g -fprofile-arcs -ftest-coverage)
+    target_link_options(throttr-protocol-tests PRIVATE --coverage)
+
     target_link_libraries(throttr-protocol-tests
             GTest::gtest_main
             throttr-protocol

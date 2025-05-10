@@ -62,6 +62,31 @@ namespace throttr {
          * Purge
          */
         purge = 0x04,
+
+        /**
+         * Set
+         */
+        set = 0x05,
+
+        /**
+         * Get
+         */
+        get = 0x06,
+    };
+
+    /**
+     * Entry types
+     */
+    enum class entry_types : uint8_t {
+        /**
+         * Raw
+         */
+        raw = 0x01,
+
+        /**
+         * Counter
+         */
+        counter = 0x00,
     };
 
     /**
@@ -133,7 +158,6 @@ namespace throttr {
          */
         decrease = 0x02,
     };
-
 
 #pragma pack(push, 1)
 
@@ -257,6 +281,68 @@ namespace throttr {
      * Request purge header size
      */
     constexpr std::size_t request_purge_header_size = sizeof(request_purge_header);
+
+#pragma pack(push, 1)
+
+    /**
+     * Request set header
+     */
+    struct request_set_header {
+        /**
+         * Request type
+         */
+        request_types request_type_;
+
+        /**
+         * TTL type
+         */
+        ttl_types ttl_type_;
+
+        /**
+         * TTL
+         */
+        value_type ttl_;
+
+        /**
+         * Key size
+         */
+        uint8_t key_size_;
+
+        /**
+         * Value size
+         */
+        uint8_t value_size_;
+    };
+#pragma pack(pop)
+
+    /**
+     * Request set header size
+     */
+    constexpr std::size_t request_set_header_size = sizeof(request_set_header);
+
+
+#pragma pack(push, 1)
+
+    /**
+     * Request get header
+     */
+    struct request_get_header {
+        /**
+         * Request type
+         */
+        request_types request_type_;
+
+        /**
+         * Key size
+         */
+        uint8_t key_size_;
+    };
+#pragma pack(pop)
+
+    /**
+     * Request get header size
+     */
+    constexpr std::size_t request_get_header_size = sizeof(request_get_header);
 
     /**
      * Request insert
@@ -426,7 +512,6 @@ namespace throttr {
         }
     };
 
-
     /**
      * Request purge
      */
@@ -483,6 +568,125 @@ namespace throttr {
         }
     };
 
+    /**
+     * Request set
+     */
+    struct request_set {
+        /**
+         * Header
+         */
+        const request_set_header *header_ = nullptr;
+
+        /**
+         * Key ID
+         */
+        std::string_view key_;
+
+        /**
+         * Value
+         */
+        std::vector<std::byte> value_;
+
+        /**
+         * From buffer
+         *
+         * @param buffer
+         * @return request_set
+         */
+        static request_set from_buffer(const std::span<const std::byte> &buffer) {
+            if (buffer.size() < request_set_header_size) {
+                throw request_error("buffer too small for request_set");
+            }
+
+            const auto *_header = reinterpret_cast<const request_set_header *>(buffer.data()); // NOSONAR
+
+            if (buffer.size() < request_set_header_size + _header->key_size_ + _header->value_size_) {
+                throw request_error("buffer too small for request_set payload");
+            }
+
+            const auto _key = buffer.subspan(request_set_header_size, _header->key_size_);
+            const auto _value = buffer.subspan(request_set_header_size + _header->key_size_, _header->value_size_);
+
+            return request_set{
+                _header,
+                std::string_view(reinterpret_cast<const char *>(_key.data()), _key.size()), // NOSONAR
+                std::vector(_value.begin(), _value.end()) , // NOSONAR
+            };
+        }
+
+        /**
+         * To buffer
+         *
+         * @return std::vector<std::byte>
+         */
+        [[nodiscard]]
+        std::vector<std::byte> to_buffer() const {
+            std::vector<std::byte> _buffer;
+            _buffer.resize(request_set_header_size + key_.size() + value_.size());
+
+            std::memcpy(_buffer.data(), header_, request_set_header_size);
+            std::memcpy(_buffer.data() + request_set_header_size, key_.data(), key_.size());
+            std::memcpy(_buffer.data() + request_set_header_size + key_.size(), value_.data(), value_.size());
+
+            return _buffer;
+        }
+    };
+
+    /**
+     * Request get
+     */
+    struct request_get {
+        /**
+         * Header
+         */
+        const request_get_header *header_ = nullptr;
+
+        /**
+         * Key
+         */
+        std::string_view key_;
+
+        /**
+         * From buffer
+         *
+         * @param buffer
+         * @return request_get
+         */
+        static request_get from_buffer(const std::span<const std::byte> &buffer) {
+            if (buffer.size() < request_get_header_size) {
+                throw request_error("buffer too small for request_get");
+            }
+
+            const auto *_header = reinterpret_cast<const request_get_header *>(buffer.data()); // NOSONAR
+
+            if (buffer.size() < request_get_header_size + _header->key_size_) {
+                throw request_error("buffer too small for request_get payload");
+            }
+
+            const auto _key = buffer.subspan(request_get_header_size, _header->key_size_);
+
+            return request_get{
+                _header,
+                std::string_view(reinterpret_cast<const char *>(_key.data()), _key.size()), // NOSONAR
+            };
+        }
+
+        /**
+         * To buffer
+         *
+         * @return std::vector<std::byte>
+         */
+        [[nodiscard]]
+        std::vector<std::byte> to_buffer() const {
+            std::vector<std::byte> _buffer;
+            _buffer.resize(request_get_header_size + key_.size());
+
+            std::memcpy(_buffer.data(), header_, request_get_header_size);
+            std::memcpy(_buffer.data() + request_get_header_size, key_.data(), key_.size());
+
+            return _buffer;
+        }
+    };
 
     /**
      * Request key
@@ -522,9 +726,14 @@ namespace throttr {
      */
     struct request_entry {
         /**
-         * Quota
+         * Type
          */
-        value_type quota_ = 0;
+        entry_types type_;
+
+        /**
+         * Value
+         */
+        std::vector<std::byte> value_;
 
         /**
          * TTL type
@@ -636,6 +845,62 @@ namespace throttr {
         _header->key_size_ = static_cast<uint8_t>(key.size());
 
         std::memcpy(_buffer.data() + request_update_header_size, key.data(), key.size());
+
+        return _buffer;
+    }
+
+    /**
+     * Request set builder
+     *
+     * @param buffer
+     * @param ttl_type
+     * @param ttl
+     * @param key
+     * @return std::vector<std::byte>
+     */
+    inline std::vector<std::byte> request_set_builder(
+        const std::vector<std::byte> &buffer,
+        const ttl_types ttl_type = ttl_types::milliseconds,
+        const value_type ttl = 0,
+        const std::string_view key = ""
+    ) {
+        std::vector<std::byte> _buffer;
+        _buffer.resize(request_set_header_size + key.size() + buffer.size());
+
+        auto *_header = reinterpret_cast<request_set_header *>(_buffer.data()); // NOSONAR
+        _header->request_type_ = request_types::set;
+        _header->ttl_type_ = ttl_type;
+        _header->ttl_ = ttl;
+        _header->key_size_ = static_cast<uint8_t>(key.size());
+        _header->value_size_ = static_cast<uint8_t>(buffer.size());
+
+        std::memcpy(_buffer.data() + request_set_header_size, key.data(), key.size());
+        std::memcpy(
+            _buffer.data() + request_set_header_size + key.size(),
+            buffer.data(),
+            buffer.size()
+        );
+
+        return _buffer;
+    }
+
+    /**
+     * Request get builder
+     *
+     * @param key
+     * @return std::vector<std::byte>
+     */
+    inline std::vector<std::byte> request_get_builder(
+        const std::string_view key = ""
+    ) {
+        std::vector<std::byte> _buffer;
+        _buffer.resize(request_get_header_size + key.size());
+
+        auto *_header = reinterpret_cast<request_get_header *>(_buffer.data()); // NOSONAR
+        _header->request_type_ = request_types::get;
+        _header->key_size_ = static_cast<uint8_t>(key.size());
+
+        std::memcpy(_buffer.data() + request_get_header_size, key.data(), key.size());
 
         return _buffer;
     }
