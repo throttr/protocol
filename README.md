@@ -24,12 +24,12 @@
 
 **Throttr** defines a minimal, lightweight and efficient binary protocol based on request types:
 
-- Insert Request
-- Query Request
-- Purge Request
-- Update Request
-- Set Request
-- Get Request
+- INSERT Request
+- QUERY Request
+- PURGE Request
+- UPDATE Request
+- SET Request
+- GET Request
 
 # 📚 Concepts to Understand the Throttr Protocol
 
@@ -42,6 +42,8 @@
 - **Request Query**: Operation that retrieves the current quota and TTL without modifying any data.
 - **Request Update**: Operation that patches, increases, or decreases the quota or TTL dynamically for a consumer-resource pair.
 - **Request Purge**: Operation that permanently deletes a consumer-resource pair from the state.
+- **Request Set**: Operation that store a arbitrary value into memory.
+- **Request Get**: Operation that retrieves a value from the memory.
 
 ## Requests
 
@@ -88,8 +90,6 @@
 | `value`        | `THROTTR_VALUE_SIZE` | X bytes | Value to apply according to the change. |
 | `key_size`     | `uint8_t`            | 1 byte  | Size of key.                            |
 | `key`          | `char[N]`            | N bytes | Key.                                    |
-
-
 
 ### 📦 Response Format
 
