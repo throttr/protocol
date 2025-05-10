@@ -311,7 +311,7 @@ namespace throttr {
         /**
          * Value size
          */
-        uint8_t value_size_;
+        value_type value_size_;
     };
 #pragma pack(pop)
 
