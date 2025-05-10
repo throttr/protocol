@@ -28,13 +28,15 @@
 - Query Request
 - Purge Request
 - Update Request
+- Set Request
+- Get Request
 
 # 📚 Concepts to Understand the Throttr Protocol
 
 - **Key**: An value that represents the unique thing that you'll do throttling.
 - **Quota**: The maximum number of allowed operations (requests, actions, accesses) a consumer can perform on a resource during a valid TTL period.
 - **TTL (Time To Live)**: The lifetime duration (in nanoseconds, milliseconds, or seconds) during which a quota remains valid before it expires and resets.
-- **TTL Type**: Defines the unit used for the TTL: nanoseconds (`ns`), milliseconds (`ms`), seconds (`s`), minutes (`m`) and [more](./include/throttr/protocol.hpp#L63).
+- **TTL Type**: Defines the unit used for the TTL: nanoseconds (`ns`), milliseconds (`ms`), seconds (`s`), minutes (`m`) and [more](./include/throttr/protocol.hpp#L95).
 - **Expires At**: The absolute expiration timestamp, calculated from the TTL and the time of insertion or update.
 - **Request Insert**: Operation that creates or resets a quota and TTL for a specific consumer-resource pair.
 - **Request Query**: Operation that retrieves the current quota and TTL without modifying any data.
@@ -51,12 +53,24 @@
 |:---------------|:---------------------|:--------|:-------------------------------------------------------|
 | `request_type` | `uint8_t`            | 1 byte  | Always 0x01 for insert.                                |
 | `quota`        | `THROTTR_VALUE_SIZE` | X bytes | Maximum number of allowed actions.                     |
-| `ttl_type`     | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
+| `ttl_type`     | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L95). |
 | `ttl`          | `THROTTR_VALUE_SIZE` | X bytes | Time to live value.                                    |
 | `key_size`     | `uint8_t`            | 1 byte  | Size of key.                                           |
 | `key`          | `char[N]`            | N bytes | Key.                                                   |
 
-### 🔍 Query and 🧹 Purge Request Format
+### 📥 Set Request Format
+
+| Field          | Type                 | Size    | Description                                            |
+|:---------------|:---------------------|:--------|:-------------------------------------------------------|
+| `request_type` | `uint8_t`            | 1 byte  | Always 0x05 for set.                                   |
+| `ttl_type`     | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L95). |
+| `ttl`          | `THROTTR_VALUE_SIZE` | X bytes | Time to live value.                                    |
+| `key_size`     | `uint8_t`            | 1 byte  | Size of key.                                           |
+| `value_size`   | `THROTTR_VALUE_SIZE` | X byte  | Size of value.                                         |
+| `key`          | `char[N]`            | N bytes | Key.                                                   |
+| `value`        | `char[M]`            | M bytes | Value.                                                 |
+
+### 🔍 Query, 🧲 Get and 🧹 Purge Request Format
 
 | Field          | Type       | Size    | Description                       |
 |:---------------|:-----------|:--------|:----------------------------------|
@@ -75,17 +89,28 @@
 | `key_size`     | `uint8_t`            | 1 byte  | Size of key.                            |
 | `key`          | `char[N]`            | N bytes | Key.                                    |
 
+
+
 ### 📦 Response Format
 
 Server on almost cases should respond with 1 byte `0x00 or 0x01` (failure or success).
 
-If the `key` exists then **Query** will respond with extra fields (5 bytes):
+If the `key` exists then **Query** will respond with extra fields (N bytes):
 
 | Field      | Type                 | Size    | Description                                            |
 |:-----------|:---------------------|:--------|:-------------------------------------------------------|
 | `quota`    | `THROTTR_VALUE_SIZE` | X bytes | Available quota.                                       |
-| `ttl_type` | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L63). |
+| `ttl_type` | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L95). |
 | `ttl`      | `THROTTR_VALUE_SIZE` | X bytes | Time to expire.                                        |
+
+If the `key` exists then **Value** will respond with extra fields (N bytes):
+
+| Field        | Type                 | Size    | Description                                            |
+|:-------------|:---------------------|:--------|:-------------------------------------------------------|
+| `ttl_type`   | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L95). |
+| `ttl`        | `THROTTR_VALUE_SIZE` | X bytes | Time to expire.                                        |
+| `value_size` | `THROTTR_VALUE_SIZE` | X bytes | Value length.                                          |
+| `value`      | `char[N]`            | N bytes | Value.                                                 |
 
 ## ⚖️ License
 
