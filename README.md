@@ -66,7 +66,7 @@
 | `ttl_type`     | `uint8_t`            | 1 byte  | See [the options](./include/throttr/protocol.hpp#L95). |
 | `ttl`          | `THROTTR_VALUE_SIZE` | X bytes | Time to live value.                                    |
 | `key_size`     | `uint8_t`            | 1 byte  | Size of key.                                           |
-| `value_size`   | `uint8_t`            | 1 byte  | Size of value.                                         |
+| `value_size`   | `THROTTR_VALUE_SIZE` | X byte  | Size of value.                                         |
 | `key`          | `char[N]`            | N bytes | Key.                                                   |
 | `value`        | `char[M]`            | M bytes | Value.                                                 |
 
