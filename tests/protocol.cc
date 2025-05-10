@@ -35,11 +35,46 @@ TEST(RequestInsertTest, ParseAndSerialize) {
     ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
 }
 
+TEST(RequestSetTest, ParseAndSerialize) {
+    std::vector _content_buffer = {
+        std::byte{0x00},
+        std::byte{0x01},
+        std::byte{0x03},
+        std::byte{0x04}
+    };
+    auto _buffer = request_set_builder(_content_buffer, ttl_types::milliseconds, 60000, "127.0.0.1:8000/api/resource");
+
+    const auto _request = request_set::from_buffer(_buffer);
+    EXPECT_EQ(_request.header_->ttl_type_, ttl_types::milliseconds);
+    EXPECT_EQ(_request.header_->ttl_, 60000);
+    EXPECT_EQ(_request.key_, "127.0.0.1:8000/api/resource");
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    ASSERT_EQ(_request.value_.size(), _content_buffer.size());
+    ASSERT_TRUE(std::equal(
+        _request.value_.begin(), _request.value_.end(),
+        _content_buffer.begin()
+    ));
+}
+
 TEST(RequestQueryTest, ParseAndSerialize) {
     auto _buffer = request_query_builder("0fa80d9d-d371-4f16-9c50-1bfa13f199b5");
 
     const auto _request = request_query::from_buffer(_buffer);
     EXPECT_EQ(_request.key_, "0fa80d9d-d371-4f16-9c50-1bfa13f199b5");
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestGetTest, ParseAndSerialize) {
+    auto _buffer = request_get_builder("65dbdbde-4f2b-4e0d-9d31-9697e2a114c4");
+
+    const auto _request = request_get::from_buffer(_buffer);
+    EXPECT_EQ(_request.key_, "65dbdbde-4f2b-4e0d-9d31-9697e2a114c4");
 
     auto _reconstructed = _request.to_buffer();
     ASSERT_EQ(_reconstructed.size(), _buffer.size());
@@ -54,6 +89,11 @@ TEST(RequestInsertTest, RejectsTooSmallBuffer) {
 TEST(RequestQueryTest, RejectsTooSmallBuffer) {
     std::vector _buffer(1, static_cast<std::byte>(0));
     ASSERT_THROW(request_query::from_buffer(_buffer), request_error);
+}
+
+TEST(RequestGetTest, RejectsTooSmallBuffer) {
+    std::vector _buffer(1, static_cast<std::byte>(0));
+    ASSERT_THROW(request_get::from_buffer(_buffer), request_error);
 }
 
 TEST(RequestInsertBenchmark, DecodePerformance) {
@@ -89,6 +129,24 @@ TEST(RequestQueryBenchmark, DecodePerformance) {
     const auto _duration = duration_cast<nanoseconds>(_end - _start);
 
     std::cout << "RequestQuery iterations: " << _iterations
+            << " on " << _duration.count() << " ns" << std::endl;
+}
+
+TEST(RequestGetBenchmark, DecodePerformance) {
+    auto _buffer = request_get_builder("benchmark");
+
+    constexpr size_t _iterations = 1'000'000;
+    const auto _start = high_resolution_clock::now();
+
+    for (size_t _i = 0; _i < _iterations; ++_i) {
+        auto _view = request_get::from_buffer(_buffer);
+        EXPECT_EQ(_view.key_, "benchmark");
+    }
+
+    const auto _end = high_resolution_clock::now();
+    const auto _duration = duration_cast<nanoseconds>(_end - _start);
+
+    std::cout << "RequestGet iterations: " << _iterations
             << " on " << _duration.count() << " ns" << std::endl;
 }
 

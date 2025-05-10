@@ -583,6 +583,11 @@ namespace throttr {
         std::string_view key_;
 
         /**
+         * Value
+         */
+        std::vector<std::byte> value_;
+
+        /**
          * From buffer
          *
          * @param buffer
@@ -595,15 +600,17 @@ namespace throttr {
 
             const auto *_header = reinterpret_cast<const request_set_header *>(buffer.data()); // NOSONAR
 
-            if (buffer.size() < request_set_header_size + _header->key_size_) {
+            if (buffer.size() < request_set_header_size + _header->key_size_ + _header->value_size_) {
                 throw request_error("buffer too small for request_set payload");
             }
 
             const auto _key = buffer.subspan(request_set_header_size, _header->key_size_);
+            const auto _value = buffer.subspan(request_set_header_size + _header->key_size_, _header->value_size_);
 
             return request_set{
                 _header,
                 std::string_view(reinterpret_cast<const char *>(_key.data()), _key.size()), // NOSONAR
+                std::vector(_value.begin(), _value.end()) , // NOSONAR
             };
         }
 
@@ -615,10 +622,11 @@ namespace throttr {
         [[nodiscard]]
         std::vector<std::byte> to_buffer() const {
             std::vector<std::byte> _buffer;
-            _buffer.resize(request_set_header_size + key_.size());
+            _buffer.resize(request_set_header_size + key_.size() + value_.size());
 
             std::memcpy(_buffer.data(), header_, request_set_header_size);
             std::memcpy(_buffer.data() + request_set_header_size, key_.data(), key_.size());
+            std::memcpy(_buffer.data() + request_set_header_size + key_.size(), value_.data(), value_.size());
 
             return _buffer;
         }

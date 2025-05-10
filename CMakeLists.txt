@@ -54,6 +54,10 @@ if (BUILD_PROTOCOL_TESTS)
     file(GLOB_RECURSE TEST_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cc)
 
     add_executable(throttr-protocol-tests ${TEST_FILES})
+
+    target_compile_options(throttr-protocol-tests PRIVATE --coverage -O0 -g -fprofile-arcs -ftest-coverage)
+    target_link_options(throttr-protocol-tests PRIVATE --coverage)
+
     target_link_libraries(throttr-protocol-tests
             GTest::gtest_main
             throttr-protocol
