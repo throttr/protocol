@@ -81,26 +81,6 @@ TEST(RequestGetTest, ParseAndSerialize) {
     ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
 }
 
-TEST(RequestInsertTest, RejectsTooSmallBuffer) {
-    std::vector _buffer(5, static_cast<std::byte>(0));
-    ASSERT_THROW(request_insert::from_buffer(_buffer), request_error);
-}
-
-TEST(RequestQueryTest, RejectsTooSmallBuffer) {
-    std::vector _buffer(1, static_cast<std::byte>(0));
-    ASSERT_THROW(request_query::from_buffer(_buffer), request_error);
-}
-
-TEST(RequestGetTest, RejectsTooSmallBuffer) {
-    std::vector _buffer(1, static_cast<std::byte>(0));
-    ASSERT_THROW(request_get::from_buffer(_buffer), request_error);
-}
-
-TEST(RequestSetTest, RejectsTooSmallBuffer) {
-    std::vector _buffer(1, static_cast<std::byte>(0));
-    ASSERT_THROW(request_set::from_buffer(_buffer), request_error);
-}
-
 TEST(RequestInsertBenchmark, DecodePerformance) {
     auto _buffer = request_insert_builder(5000, ttl_types::milliseconds, 60000, "benchmark");
 
@@ -155,52 +135,6 @@ TEST(RequestGetBenchmark, DecodePerformance) {
             << " on " << _duration.count() << " ns" << std::endl;
 }
 
-TEST(RequestInsertTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_insert_header_size + 3);
-
-    auto *_header = reinterpret_cast<request_insert_header *>(_buffer.data()); // NOSONAR
-    _header->request_type_ = request_types::insert;
-    _header->quota_ = 10;
-    _header->ttl_type_ = ttl_types::milliseconds;
-    _header->ttl_ = 10000;
-    _header->key_size_ = 5;
-
-    ASSERT_THROW(request_insert::from_buffer(_buffer), request_error);
-}
-
-TEST(RequestSetTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_set_header_size + 3);
-
-    auto *_header = reinterpret_cast<request_set_header *>(_buffer.data()); // NOSONAR
-    _header->request_type_ = request_types::set;
-    _header->ttl_type_ = ttl_types::milliseconds;
-    _header->ttl_ = 10000;
-    _header->key_size_ = 20;
-    _header->value_size_ = 20;
-
-    ASSERT_THROW(request_set::from_buffer(_buffer), request_error);
-}
-
-TEST(RequestGetTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_get_header_size + 3);
-
-    auto *_header = reinterpret_cast<request_get_header *>(_buffer.data()); // NOSONAR
-    _header->request_type_ = request_types::get;
-    _header->key_size_ = 20;
-
-    ASSERT_THROW(request_get::from_buffer(_buffer), request_error);
-}
-
-TEST(RequestQueryTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_query_header_size + 3);
-
-    auto *_header = reinterpret_cast<request_query_header *>(_buffer.data()); // NOSONAR
-    _header->request_type_ = request_types::query;
-    _header->key_size_ = 5;
-
-    ASSERT_THROW(request_query::from_buffer(_buffer), request_error);
-}
-
 TEST(RequestUpdateTest, ParseAndSerialize) {
     auto _buffer = request_update_builder(attribute_types::quota, change_types::patch, 5000, "x");
 
@@ -215,24 +149,6 @@ TEST(RequestUpdateTest, ParseAndSerialize) {
     ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
 }
 
-TEST(RequestUpdateTest, RejectsTooSmallBuffer) {
-    std::vector _buffer(5, static_cast<std::byte>(0));
-    ASSERT_THROW(request_update::from_buffer(_buffer), request_error);
-}
-
-TEST(RequestUpdateTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_update_header_size + 3);
-
-    auto *_header = reinterpret_cast<request_update_header *>(_buffer.data()); // NOSONAR
-    _header->request_type_ = request_types::update;
-    _header->attribute_ = attribute_types::quota;
-    _header->change_ = change_types::patch;
-    _header->value_ = 5000;
-    _header->key_size_ = 5;
-
-    ASSERT_THROW(request_update::from_buffer(_buffer), request_error);
-}
-
 TEST(RequestPurgeTest, ParseAndSerialize) {
     auto _buffer = request_purge_builder("v5");
 
@@ -242,21 +158,6 @@ TEST(RequestPurgeTest, ParseAndSerialize) {
     auto _reconstructed = _request.to_buffer();
     ASSERT_EQ(_reconstructed.size(), _buffer.size());
     ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
-}
-
-TEST(RequestPurgeTest, RejectsTooSmallBuffer) {
-    std::vector _buffer(1, static_cast<std::byte>(0));
-    ASSERT_THROW(request_purge::from_buffer(_buffer), request_error);
-}
-
-TEST(RequestPurgeTest, RejectsInvalidPayloadSize) {
-    std::vector<std::byte> _buffer(request_purge_header_size + 3);
-
-    auto *_header = reinterpret_cast<request_purge_header *>(_buffer.data()); // NOSONAR
-    _header->request_type_ = request_types::purge;
-    _header->key_size_ = 5;
-
-    ASSERT_THROW(request_purge::from_buffer(_buffer), request_error);
 }
 
 

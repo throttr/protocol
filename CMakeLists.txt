@@ -30,7 +30,7 @@ install(EXPORT throttr-protocolTargets
 
 write_basic_package_version_file(
         "${CMAKE_CURRENT_BINARY_DIR}/throttr-protocolConfigVersion.cmake"
-        VERSION 4.0.2
+        VERSION 4.0.3
         COMPATIBILITY SameMajorVersion
 )
 

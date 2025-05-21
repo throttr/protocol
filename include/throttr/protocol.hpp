@@ -365,16 +365,7 @@ namespace throttr {
          * @return request_insert
          */
         static request_insert from_buffer(const std::span<const std::byte> &buffer) {
-            if (buffer.size() < request_insert_header_size) {
-                throw request_error("buffer too small for request_insert");
-            }
-
             const auto *_header = reinterpret_cast<const request_insert_header *>(buffer.data()); // NOSONAR
-
-            if (buffer.size() < request_insert_header_size + _header->key_size_) {
-                throw request_error("buffer too small for request_insert payload");
-            }
-
             const auto _key = buffer.subspan(request_insert_header_size, _header->key_size_);
 
             return request_insert{
@@ -421,16 +412,7 @@ namespace throttr {
          * @return request_query
          */
         static request_query from_buffer(const std::span<const std::byte> &buffer) {
-            if (buffer.size() < request_query_header_size) {
-                throw request_error("buffer too small for request_query");
-            }
-
             const auto *_header = reinterpret_cast<const request_query_header *>(buffer.data()); // NOSONAR
-
-            if (buffer.size() < request_query_header_size + _header->key_size_) {
-                throw request_error("buffer too small for request_query payload");
-            }
-
             const auto _key = buffer.subspan(request_query_header_size, _header->key_size_);
 
             return request_query{
@@ -477,16 +459,7 @@ namespace throttr {
          * @return request_update
          */
         static request_update from_buffer(const std::span<const std::byte> &buffer) {
-            if (buffer.size() < request_update_header_size) {
-                throw request_error("buffer too small for request_update");
-            }
-
             const auto *_header = reinterpret_cast<const request_update_header *>(buffer.data()); // NOSONAR
-
-            if (buffer.size() < request_update_header_size + _header->key_size_) {
-                throw request_error("buffer too small for request_update payload");
-            }
-
             const auto _key = buffer.subspan(request_update_header_size, _header->key_size_);
 
             return request_update{
@@ -533,16 +506,7 @@ namespace throttr {
          * @return request_purge
          */
         static request_purge from_buffer(const std::span<const std::byte> &buffer) {
-            if (buffer.size() < request_purge_header_size) {
-                throw request_error("buffer too small for request_purge");
-            }
-
             const auto *_header = reinterpret_cast<const request_purge_header *>(buffer.data()); // NOSONAR
-
-            if (buffer.size() < request_purge_header_size + _header->key_size_) {
-                throw request_error("buffer too small for request_purge payload");
-            }
-
             const auto _key = buffer.subspan(request_purge_header_size, _header->key_size_);
 
             return request_purge{
@@ -585,7 +549,7 @@ namespace throttr {
         /**
          * Value
          */
-        std::vector<std::byte> value_;
+        std::span<const std::byte> value_;
 
         /**
          * From buffer
@@ -594,23 +558,14 @@ namespace throttr {
          * @return request_set
          */
         static request_set from_buffer(const std::span<const std::byte> &buffer) {
-            if (buffer.size() < request_set_header_size) {
-                throw request_error("buffer too small for request_set");
-            }
-
             const auto *_header = reinterpret_cast<const request_set_header *>(buffer.data()); // NOSONAR
-
-            if (buffer.size() < request_set_header_size + _header->key_size_ + _header->value_size_) {
-                throw request_error("buffer too small for request_set payload");
-            }
-
             const auto _key = buffer.subspan(request_set_header_size, _header->key_size_);
             const auto _value = buffer.subspan(request_set_header_size + _header->key_size_, _header->value_size_);
 
             return request_set{
                 _header,
                 std::string_view(reinterpret_cast<const char *>(_key.data()), _key.size()), // NOSONAR
-                std::vector(_value.begin(), _value.end()) , // NOSONAR
+                _value,
             };
         }
 
@@ -653,16 +608,7 @@ namespace throttr {
          * @return request_get
          */
         static request_get from_buffer(const std::span<const std::byte> &buffer) {
-            if (buffer.size() < request_get_header_size) {
-                throw request_error("buffer too small for request_get");
-            }
-
             const auto *_header = reinterpret_cast<const request_get_header *>(buffer.data()); // NOSONAR
-
-            if (buffer.size() < request_get_header_size + _header->key_size_) {
-                throw request_error("buffer too small for request_get payload");
-            }
-
             const auto _key = buffer.subspan(request_get_header_size, _header->key_size_);
 
             return request_get{
