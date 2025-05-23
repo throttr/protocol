@@ -1260,6 +1260,116 @@ namespace throttr {
 
         return _buffer;
     }
+
+    /**
+     * Request list builder
+     *
+     * @return std::vector<std::byte>
+     */
+    inline std::vector<std::byte> request_list_builder() {
+        std::vector<std::byte> _buffer;
+        auto *_header = reinterpret_cast<request_list_header *>(_buffer.data()); // NOSONAR
+        _header->request_type_ = request_types::list;
+
+        return _buffer;
+    }
+
+    /**
+     * Request info builder
+     *
+     * @return std::vector<std::byte>
+     */
+    inline std::vector<std::byte> request_info_builder() {
+        std::vector<std::byte> _buffer;
+        auto *_header = reinterpret_cast<request_info_header *>(_buffer.data()); // NOSONAR
+        _header->request_type_ = request_types::info;
+
+        return _buffer;
+    }
+
+    /**
+     * Request stats builder
+     *
+     * @return std::vector<std::byte>
+     */
+    inline std::vector<std::byte> request_stats_builder() {
+        std::vector<std::byte> _buffer;
+        auto *_header = reinterpret_cast<request_stats_header *>(_buffer.data()); // NOSONAR
+        _header->request_type_ = request_types::stats;
+
+        return _buffer;
+    }
+
+    /**
+     * Request subscribe builder
+     *
+     * @param channel
+     * @return std::vector<std::byte>
+     */
+    inline std::vector<std::byte> request_subscribe_builder(
+        const std::string_view channel = ""
+    ) {
+        std::vector<std::byte> _buffer;
+        _buffer.resize(request_subscribe_header_size + channel.size());
+
+        auto *_header = reinterpret_cast<request_subscribe_header *>(_buffer.data()); // NOSONAR
+        _header->request_type_ = request_types::subscribe;
+        _header->channel_size_ = static_cast<uint8_t>(channel.size());
+
+        std::memcpy(_buffer.data() + request_subscribe_header_size, channel.data(), channel.size());
+
+        return _buffer;
+    }
+
+    /**
+     * Request unsubscribe builder
+     *
+     * @param channel
+     * @return std::vector<std::byte>
+     */
+    inline std::vector<std::byte> request_unsubscribe_builder(
+        const std::string_view channel = ""
+    ) {
+        std::vector<std::byte> _buffer;
+        _buffer.resize(request_unsubscribe_header_size + channel.size());
+
+        auto *_header = reinterpret_cast<request_unsubscribe_header *>(_buffer.data()); // NOSONAR
+        _header->request_type_ = request_types::unsubscribe;
+        _header->channel_size_ = static_cast<uint8_t>(channel.size());
+
+        std::memcpy(_buffer.data() + request_unsubscribe_header_size, channel.data(), channel.size());
+
+        return _buffer;
+    }
+
+    /**
+     * Request publish builder
+     *
+     * @param channel
+     * @param buffer
+     * @return std::vector<std::byte>
+     */
+    inline std::vector<std::byte> request_publish_builder(
+        const std::string_view channel = "",
+        const std::vector<std::byte> &buffer
+    ) {
+        std::vector<std::byte> _buffer;
+        _buffer.resize(request_publish_header_size + channel.size());
+
+        auto *_header = reinterpret_cast<request_publish_header *>(_buffer.data()); // NOSONAR
+        _header->request_type_ = request_types::publish;
+        _header->channel_size_ = static_cast<uint8_t>(channel.size());
+        _header->value_size_ = static_cast<value_type>(buffer.size());
+
+        std::memcpy(_buffer.data() + request_publish_header_size, channel.data(), channel.size());
+        std::memcpy(
+            _buffer.data() + request_publish_header_size + channel.size(),
+            buffer.data(),
+            buffer.size()
+        );
+
+        return _buffer;
+    }
 }
 
 #endif // THROTTR_PROTOCOL_HPP
