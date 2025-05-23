@@ -26,6 +26,4 @@
 
 ## License
 
-This software has been built by **Ian Torres** and released using [GNU Affero General Public License](./LICENSE).
-
-We can talk, send me something to [iantorres@outlook.com](mailto:iantorres@outlook.com).
+Distributed under the [GNU Affero General Public License v3.0](./LICENSE).
