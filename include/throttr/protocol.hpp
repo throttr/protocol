@@ -72,6 +72,36 @@ namespace throttr {
          * Get
          */
         get = 0x06,
+
+        /**
+         * List
+         */
+        list = 0x07,
+
+        /**
+         * Info
+         */
+        info = 0x08,
+
+        /**
+         * Info
+         */
+        stats = 0x09,
+
+        /**
+         * Subscribe
+         */
+        subscribe = 0x10,
+
+        /**
+         * Unsubscribe
+         */
+        unsubscribe = 0x11,
+
+        /**
+         * Publish
+         */
+        publish = 0x12,
     };
 
     /**
@@ -343,6 +373,123 @@ namespace throttr {
      * Request get header size
      */
     constexpr std::size_t request_get_header_size = sizeof(request_get_header);
+
+#pragma pack(push, 1)
+    /**
+     * Request list header
+     */
+    struct request_list_header {
+        /**
+         * Request type
+         */
+        request_types request_type_;
+    };
+#pragma pack(pop)
+    /**
+     * Request list header size
+     */
+    constexpr std::size_t request_list_header_size = sizeof(request_list_header);
+
+#pragma pack(push, 1)
+    /**
+     * Request info header
+     */
+    struct request_info_header {
+        /**
+         * Request type
+         */
+        request_types request_type_;
+    };
+#pragma pack(pop)
+    /**
+     * Request info header size
+     */
+    constexpr std::size_t request_info_header_size = sizeof(request_info_header);
+
+#pragma pack(push, 1)
+    /**
+     * Request stats header
+     */
+    struct request_stats_header {
+        /**
+         * Request type
+         */
+        request_types request_type_;
+    };
+#pragma pack(pop)
+    /**
+     * Request stats header size
+     */
+    constexpr std::size_t request_stats_header_size = sizeof(request_stats_header);
+
+#pragma pack(push, 1)
+    /**
+     * Request subscribe header
+     */
+    struct request_subscribe_header {
+        /**
+         * Request type
+         */
+        request_types request_type_;
+
+        /**
+         * Channel size
+         */
+        uint8_t channel_size_;
+    };
+#pragma pack(pop)
+    /**
+     * Request subscribe header size
+     */
+    constexpr std::size_t request_subscribe_header_size = sizeof(request_subscribe_header);
+
+#pragma pack(push, 1)
+    /**
+     * Request unsubscribe header
+     */
+    struct request_unsubscribe_header {
+        /**
+         * Request type
+         */
+        request_types request_type_;
+
+        /**
+         * Channel size
+         */
+        uint8_t channel_size_;
+    };
+#pragma pack(pop)
+    /**
+     * Request unsubscribe header size
+     */
+    constexpr std::size_t request_unsubscribe_header_size = sizeof(request_unsubscribe_header);
+
+
+#pragma pack(push, 1)
+    /**
+     * Request publish header
+     */
+    struct request_publish_header {
+        /**
+         * Request type
+         */
+        request_types request_type_;
+
+        /**
+         * Channel size
+         */
+        uint8_t channel_size_;
+
+        /**
+         * Channel size
+         */
+        value_type value_size_;
+    };
+#pragma pack(pop)
+    /**
+     * Request publish header size
+     */
+    constexpr std::size_t request_publish_header_size = sizeof(request_publish_header);
 
     /**
      * Request insert
@@ -629,6 +776,269 @@ namespace throttr {
 
             std::memcpy(_buffer.data(), header_, request_get_header_size);
             std::memcpy(_buffer.data() + request_get_header_size, key_.data(), key_.size());
+
+            return _buffer;
+        }
+    };
+
+    /**
+     * Request list
+     */
+    struct request_list {
+        /**
+         * Header
+         */
+        const request_list_header *header_ = nullptr;
+
+        /**
+         * From buffer
+         *
+         * @param buffer
+         * @return request_query
+         */
+        static request_list from_buffer(const std::span<const std::byte> &buffer) {
+            const auto *_header = reinterpret_cast<const request_list_header *>(buffer.data()); // NOSONAR
+
+            return request_list{
+                _header
+            };
+        }
+
+        /**
+         * To buffer
+         *
+         * @return std::vector<std::byte>
+         */
+        [[nodiscard]]
+        std::vector<std::byte> to_buffer() const {
+            std::vector<std::byte> _buffer;
+            _buffer.resize(request_list_header_size);
+
+            std::memcpy(_buffer.data(), header_, request_list_header_size);
+            return _buffer;
+        }
+    };
+
+    /**
+     * Request info
+     */
+    struct request_info {
+        /**
+         * Header
+         */
+        const request_info_header *header_ = nullptr;
+
+        /**
+         * From buffer
+         *
+         * @param buffer
+         * @return request_query
+         */
+        static request_info from_buffer(const std::span<const std::byte> &buffer) {
+            const auto *_header = reinterpret_cast<const request_info_header *>(buffer.data()); // NOSONAR
+
+            return request_info{
+                _header
+            };
+        }
+
+        /**
+         * To buffer
+         *
+         * @return std::vector<std::byte>
+         */
+        [[nodiscard]]
+        std::vector<std::byte> to_buffer() const {
+            std::vector<std::byte> _buffer;
+            _buffer.resize(request_info_header_size);
+
+            std::memcpy(_buffer.data(), header_, request_info_header_size);
+            return _buffer;
+        }
+    };
+
+    /**
+     * Request stats
+     */
+    struct request_stats {
+        /**
+         * Header
+         */
+        const request_stats_header *header_ = nullptr;
+
+        /**
+         * From buffer
+         *
+         * @param buffer
+         * @return request_query
+         */
+        static request_stats from_buffer(const std::span<const std::byte> &buffer) {
+            const auto *_header = reinterpret_cast<const request_stats_header *>(buffer.data()); // NOSONAR
+
+            return request_stats{
+                _header
+            };
+        }
+
+        /**
+         * To buffer
+         *
+         * @return std::vector<std::byte>
+         */
+        [[nodiscard]]
+        std::vector<std::byte> to_buffer() const {
+            std::vector<std::byte> _buffer;
+            _buffer.resize(request_stats_header_size);
+
+            std::memcpy(_buffer.data(), header_, request_stats_header_size);
+            return _buffer;
+        }
+    };
+
+    /**
+     * Request subscribe
+     */
+    struct request_subscribe {
+        /**
+         * Header
+         */
+        const request_subscribe_header *header_ = nullptr;
+
+        /**
+         * Channel
+         */
+        std::string_view channel_;
+
+        /**
+         * From buffer
+         *
+         * @param buffer
+         * @return request_query
+         */
+        static request_subscribe from_buffer(const std::span<const std::byte> &buffer) {
+            const auto *_header = reinterpret_cast<const request_subscribe_header *>(buffer.data()); // NOSONAR
+            const auto _channel = buffer.subspan(request_subscribe_header_size, _header->channel_size_);
+
+            return request_subscribe{
+                _header,
+                std::string_view(reinterpret_cast<const char *>(_channel.data()), _channel.size()), // NOSONAR
+            };
+        }
+
+        /**
+         * To buffer
+         *
+         * @return std::vector<std::byte>
+         */
+        [[nodiscard]]
+        std::vector<std::byte> to_buffer() const {
+            std::vector<std::byte> _buffer;
+            _buffer.resize(request_subscribe_header_size + channel_.size());
+
+            std::memcpy(_buffer.data(), header_, request_subscribe_header_size);
+            std::memcpy(_buffer.data() + request_subscribe_header_size, channel_.data(), channel_.size());
+
+            return _buffer;
+        }
+    };
+
+    /**
+     * Request unsubscribe
+     */
+    struct request_unsubscribe {
+        /**
+         * Header
+         */
+        const request_unsubscribe_header *header_ = nullptr;
+
+        /**
+         * Channel
+         */
+        std::string_view channel_;
+
+        /**
+         * From buffer
+         *
+         * @param buffer
+         * @return request_query
+         */
+        static request_unsubscribe from_buffer(const std::span<const std::byte> &buffer) {
+            const auto *_header = reinterpret_cast<const request_unsubscribe_header *>(buffer.data()); // NOSONAR
+            const auto _channel = buffer.subspan(request_unsubscribe_header_size, _header->channel_size_);
+
+            return request_unsubscribe{
+                _header,
+                std::string_view(reinterpret_cast<const char *>(_channel.data()), _channel.size()), // NOSONAR
+            };
+        }
+
+        /**
+         * To buffer
+         *
+         * @return std::vector<std::byte>
+         */
+        [[nodiscard]]
+        std::vector<std::byte> to_buffer() const {
+            std::vector<std::byte> _buffer;
+            _buffer.resize(request_unsubscribe_header_size + channel_.size());
+
+            std::memcpy(_buffer.data(), header_, request_unsubscribe_header_size);
+            std::memcpy(_buffer.data() + request_unsubscribe_header_size, channel_.data(), channel_.size());
+
+            return _buffer;
+        }
+    };
+
+    /**
+     * Request publish
+     */
+    struct request_publish {
+        /**
+         * Header
+         */
+        const request_publish_header *header_ = nullptr;
+
+        /**
+         * Channel
+         */
+        std::string_view channel_;
+
+        /**
+         * Value
+         */
+        std::string_view value_;
+
+        /**
+         * From buffer
+         *
+         * @param buffer
+         * @return request_query
+         */
+        static request_publish from_buffer(const std::span<const std::byte> &buffer) {
+            const auto *_header = reinterpret_cast<const request_publish_header *>(buffer.data()); // NOSONAR
+            const auto _channel = buffer.subspan(request_publish_header_size, _header->channel_size_);
+            const auto _value = buffer.subspan(request_publish_header_size + _header->channel_size_, _header->value_size_);
+
+            return request_publish{
+                _header,
+                std::string_view(reinterpret_cast<const char *>(_channel.data()), _channel.size()), // NOSONAR
+                std::string_view(reinterpret_cast<const char *>(_value.data()), _value.size()), // NOSONAR
+            };
+        }
+
+        /**
+         * To buffer
+         *
+         * @return std::vector<std::byte>
+         */
+        [[nodiscard]]
+        std::vector<std::byte> to_buffer() const {
+            std::vector<std::byte> _buffer;
+            _buffer.resize(request_publish_header_size + channel_.size());
+
+            std::memcpy(_buffer.data(), header_, request_publish_header_size);
+            std::memcpy(_buffer.data() + request_publish_header_size, channel_.data(), channel_.size());
+            std::memcpy(_buffer.data() + request_publish_header_size + channel_.size(), value_.data(), value_.size());
 
             return _buffer;
         }
