@@ -1006,7 +1006,7 @@ namespace throttr {
         /**
          * Value
          */
-        std::string_view value_;
+        std::span<const std::byte> value_;
 
         /**
          * From buffer
@@ -1022,7 +1022,7 @@ namespace throttr {
             return request_publish{
                 _header,
                 std::string_view(reinterpret_cast<const char *>(_channel.data()), _channel.size()), // NOSONAR
-                std::string_view(reinterpret_cast<const char *>(_value.data()), _value.size()), // NOSONAR
+                _value,
             };
         }
 
@@ -1034,7 +1034,7 @@ namespace throttr {
         [[nodiscard]]
         std::vector<std::byte> to_buffer() const {
             std::vector<std::byte> _buffer;
-            _buffer.resize(request_publish_header_size + channel_.size());
+            _buffer.resize(request_publish_header_size + channel_.size() + value_.size());
 
             std::memcpy(_buffer.data(), header_, request_publish_header_size);
             std::memcpy(_buffer.data() + request_publish_header_size, channel_.data(), channel_.size());
@@ -1268,6 +1268,8 @@ namespace throttr {
      */
     inline std::vector<std::byte> request_list_builder() {
         std::vector<std::byte> _buffer;
+        _buffer.resize(request_list_header_size);
+
         auto *_header = reinterpret_cast<request_list_header *>(_buffer.data()); // NOSONAR
         _header->request_type_ = request_types::list;
 
@@ -1281,6 +1283,8 @@ namespace throttr {
      */
     inline std::vector<std::byte> request_info_builder() {
         std::vector<std::byte> _buffer;
+        _buffer.resize(request_info_header_size);
+
         auto *_header = reinterpret_cast<request_info_header *>(_buffer.data()); // NOSONAR
         _header->request_type_ = request_types::info;
 
@@ -1294,6 +1298,8 @@ namespace throttr {
      */
     inline std::vector<std::byte> request_stats_builder() {
         std::vector<std::byte> _buffer;
+        _buffer.resize(request_stats_header_size);
+
         auto *_header = reinterpret_cast<request_stats_header *>(_buffer.data()); // NOSONAR
         _header->request_type_ = request_types::stats;
 
@@ -1345,16 +1351,16 @@ namespace throttr {
     /**
      * Request publish builder
      *
-     * @param channel
      * @param buffer
+     * @param channel
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_publish_builder(
-        const std::string_view channel = "",
-        const std::vector<std::byte> &buffer
+        const std::vector<std::byte> &buffer,
+        const std::string_view channel = ""
     ) {
         std::vector<std::byte> _buffer;
-        _buffer.resize(request_publish_header_size + channel.size());
+        _buffer.resize(request_publish_header_size + channel.size() + buffer.size());
 
         auto *_header = reinterpret_cast<request_publish_header *>(_buffer.data()); // NOSONAR
         _header->request_type_ = request_types::publish;

@@ -160,6 +160,76 @@ TEST(RequestPurgeTest, ParseAndSerialize) {
     ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
 }
 
+TEST(RequestListTest, ParseAndSerialize) {
+    auto _buffer = request_list_builder();
+
+    const auto _request = request_list::from_buffer(_buffer);
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestInfoTest, ParseAndSerialize) {
+    auto _buffer = request_info_builder();
+
+    const auto _request = request_info::from_buffer(_buffer);
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestStatsTest, ParseAndSerialize) {
+    auto _buffer = request_stats_builder();
+
+    const auto _request = request_stats::from_buffer(_buffer);
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestSubscribeTest, ParseAndSerialize) {
+    auto _buffer = request_subscribe_builder("v6");
+
+    const auto _request = request_subscribe::from_buffer(_buffer);
+    EXPECT_EQ(_request.channel_, "v6");
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestUnsubscribeTest, ParseAndSerialize) {
+    auto _buffer = request_unsubscribe_builder("v6");
+
+    const auto _request = request_unsubscribe::from_buffer(_buffer);
+    EXPECT_EQ(_request.channel_, "v6");
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestPublishTest, ParseAndSerialize) {
+    std::vector _content_buffer = {
+        std::byte{0x00},
+        std::byte{0x01},
+        std::byte{0x03},
+        std::byte{0x04}
+    };
+    auto _buffer = request_publish_builder(_content_buffer, "v6");
+
+    const auto _request = request_publish::from_buffer(_buffer);
+    EXPECT_EQ(_request.channel_, "v6");
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    ASSERT_EQ(_request.value_.size(), _content_buffer.size());
+    ASSERT_TRUE(std::equal(
+        _request.value_.begin(), _request.value_.end(),
+        _content_buffer.begin()
+    ));
+}
 
 TEST(RequestKeyTest, EqualsIdenticalKeys) {
     const request_key _a{"equals"};
