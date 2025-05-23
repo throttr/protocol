@@ -43,6 +43,11 @@
 #include <throttr/protocol/requests/subscribe.hpp>
 #include <throttr/protocol/requests/unsubscribe.hpp>
 #include <throttr/protocol/requests/publish.hpp>
+#include <throttr/protocol/requests/connections.hpp>
+#include <throttr/protocol/requests/connection.hpp>
+#include <throttr/protocol/requests/channels.hpp>
+#include <throttr/protocol/requests/channel.hpp>
+#include <throttr/protocol/requests/whoami.hpp>
 
 #include <throttr/protocol/request_key.hpp>
 #include <throttr/protocol/request_key_hasher.hpp>
