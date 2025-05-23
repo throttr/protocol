@@ -81,6 +81,51 @@ TEST(RequestGetTest, ParseAndSerialize) {
     ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
 }
 
+TEST(RequestConnectionsTest, ParseAndSerialize) {
+    auto _buffer = request_connections_builder();
+    const auto _request = request_connections::from_buffer(_buffer);
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestConnectionTest, ParseAndSerialize) {
+    auto _buffer = request_connection_builder(0);
+    const auto _request = request_connection::from_buffer(_buffer);
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestChannelsTest, ParseAndSerialize) {
+    auto _buffer = request_channels_builder();
+    const auto _request = request_channels::from_buffer(_buffer);
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestChannelTest, ParseAndSerialize) {
+    auto _buffer = request_channel_builder("EHLO");
+    const auto _request = request_channel::from_buffer(_buffer);
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
+TEST(RequestWhoAMITest, ParseAndSerialize) {
+    auto _buffer = request_whoami_builder();
+    const auto _request = request_whoami::from_buffer(_buffer);
+
+    auto _reconstructed = _request.to_buffer();
+    ASSERT_EQ(_reconstructed.size(), _buffer.size());
+    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+}
+
 TEST(RequestInsertBenchmark, DecodePerformance) {
     auto _buffer = request_insert_builder(5000, ttl_types::milliseconds, 60000, "benchmark");
 

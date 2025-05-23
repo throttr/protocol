@@ -87,6 +87,31 @@ namespace throttr {
          * Publish
          */
         publish = 0x13,
+
+        /**
+         * Connections
+         */
+        connections = 0x14,
+
+        /**
+         * Connection
+         */
+        connection = 0x15,
+
+        /**
+         * Channels
+         */
+        channels = 0x16,
+
+        /**
+         * Channel
+         */
+        channel = 0x17,
+
+        /**
+         * whoami
+         */
+        whoami = 0x18,
     };
 }
 
