@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef THROTTR_VALUE_TYPE_HPP
-#define VALUE_TYPE_HPP
+#ifndef THROTTR_PROTOCOL_VALUE_TYPE_HPP
+#define THROTTR_PROTOCOL_VALUE_TYPE_HPP
 
 #include <cstdint>
 
@@ -24,4 +24,4 @@ using value_type = uint16_t;
 using value_type = THROTTR_VALUE_SIZE;
 #endif
 
-#endif // THROTTR_VALUE_TYPE_HPP
+#endif // THROTTR_PROTOCOL_VALUE_TYPE_HPP
