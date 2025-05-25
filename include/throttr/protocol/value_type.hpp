@@ -16,8 +16,6 @@
 #ifndef THROTTR_PROTOCOL_VALUE_TYPE_HPP
 #define THROTTR_PROTOCOL_VALUE_TYPE_HPP
 
-#include <cstdint>
-
 #ifndef THROTTR_VALUE_SIZE
 using value_type = uint16_t;
 #else

@@ -17,7 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_SET_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
     /**
      * Request set header
      */
@@ -47,7 +46,6 @@ namespace throttr {
          */
         value_type value_size_;
     };
-#pragma pack(pop)
 
     /**
      * Request set header size

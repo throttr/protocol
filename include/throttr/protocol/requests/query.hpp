@@ -17,7 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_QUERY_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
     /**
      * Request query header
      */
@@ -32,7 +31,6 @@ namespace throttr {
          */
         uint8_t key_size_;
     };
-#pragma pack(pop)
 
     /**
      * Request query header size

@@ -17,8 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_PURGE_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
-
     /**
      * Request purge header
      */
@@ -33,7 +31,6 @@ namespace throttr {
          */
         uint8_t key_size_;
     };
-#pragma pack(pop)
 
     /**
      * Request purge header size

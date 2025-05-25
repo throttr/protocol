@@ -17,7 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_SUBSCRIBE_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
     /**
      * Request subscribe header
      */
@@ -32,7 +31,7 @@ namespace throttr {
          */
         uint8_t channel_size_;
     };
-#pragma pack(pop)
+
     /**
      * Request subscribe header size
      */

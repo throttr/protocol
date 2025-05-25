@@ -16,8 +16,6 @@
 #ifndef THROTTR_PROTOCOL_TTL_TYPES_HPP
 #define THROTTR_PROTOCOL_TTL_TYPES_HPP
 
-#include <cstdint>
-
 namespace throttr {
     /**
       * TTL types

@@ -17,8 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_CONNECTION_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
-
     /**
      * Request connection header
      */
@@ -33,7 +31,6 @@ namespace throttr {
          */
         uint32_t index_;
     };
-#pragma pack(pop)
 
     /**
      * Request connection header size

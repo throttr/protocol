@@ -17,7 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_UNSUBSCRIBE_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
     /**
      * Request unsubscribe header
      */
@@ -32,7 +31,6 @@ namespace throttr {
          */
         uint8_t channel_size_;
     };
-#pragma pack(pop)
 
     /**
      * Request unsubscribe header size
