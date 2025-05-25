@@ -16,8 +16,6 @@
 #ifndef THROTTR_PROTOCOL_ENTRY_TYPES_HPP
 #define THROTTR_PROTOCOL_ENTRY_TYPES_HPP
 
-#include <cstdint>
-
 namespace throttr {
     /**
       * Entry types

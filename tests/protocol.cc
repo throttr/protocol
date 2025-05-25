@@ -15,8 +15,6 @@
 
 #include <gtest/gtest.h>
 #include <throttr/protocol.hpp>
-#include <chrono>
-#include <vector>
 
 using namespace throttr;
 using namespace std::chrono;

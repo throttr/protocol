@@ -22,7 +22,9 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <cstdint>
 
+#pragma pack(push, 1)
 #include <throttr/protocol/value_type.hpp>
 #include <throttr/protocol/request_types.hpp>
 #include <throttr/protocol/entry_types.hpp>
@@ -52,5 +54,6 @@
 #include <throttr/protocol/request_key.hpp>
 #include <throttr/protocol/request_key_hasher.hpp>
 #include <throttr/protocol/request_entry.hpp>
+#pragma pack(pop)
 
 #endif // THROTTR_PROTOCOL_HPP

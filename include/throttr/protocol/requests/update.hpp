@@ -17,8 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_UPDATE_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
-
     /**
      * Request update header
      */
@@ -48,7 +46,6 @@ namespace throttr {
          */
         uint8_t key_size_;
     };
-#pragma pack(pop)
 
     /**
      * Request update header size

@@ -17,7 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_INFO_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
     /**
      * Request info header
      */
@@ -27,7 +26,6 @@ namespace throttr {
          */
         request_types request_type_;
     };
-#pragma pack(pop)
 
     /**
      * Request info header size

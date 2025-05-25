@@ -17,7 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_PUBLISH_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
     /**
      * Request publish header
      */
@@ -37,7 +36,7 @@ namespace throttr {
          */
         value_type value_size_;
     };
-#pragma pack(pop)
+
     /**
      * Request publish header size
      */

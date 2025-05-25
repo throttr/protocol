@@ -17,8 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_CHANNEL_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
-
     /**
      * Request channel header
      */
@@ -33,13 +31,11 @@ namespace throttr {
          */
         uint8_t channel_size_;
     };
-#pragma pack(pop)
 
     /**
      * Request channel header size
      */
     constexpr std::size_t request_channel_header_size = sizeof(request_channel_header);
-
 
     /**
      * Request channel

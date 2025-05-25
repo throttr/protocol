@@ -16,10 +16,7 @@
 #ifndef THROTTR_PROTOCOL_REQUESTS_INSERT_HPP
 #define THROTTR_PROTOCOL_REQUESTS_INSERT_HPP
 
-#include <throttr/protocol/request_types.hpp>
-
 namespace throttr {
-#pragma pack(push, 1)
     /**
      * Request insert header
      */
@@ -49,7 +46,6 @@ namespace throttr {
          */
         uint8_t key_size_;
     };
-#pragma pack(pop)
 
     /**
      * Request insert header size

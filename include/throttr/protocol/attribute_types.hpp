@@ -16,8 +16,6 @@
 #ifndef THROTTR_PROTOCOL_ATTRIBUTE_TYPES_HPP
 #define THROTTR_PROTOCOL_ATTRIBUTE_TYPES_HPP
 
-#include <cstdint>
-
 namespace throttr {
     /**
      * Attribute type

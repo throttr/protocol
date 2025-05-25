@@ -17,7 +17,6 @@
 #define THROTTR_PROTOCOL_REQUESTS_STATS_HPP
 
 namespace throttr {
-#pragma pack(push, 1)
     /**
      * Request stats header
      */
@@ -27,7 +26,7 @@ namespace throttr {
          */
         request_types request_type_;
     };
-#pragma pack(pop)
+
     /**
      * Request stats header size
      */
