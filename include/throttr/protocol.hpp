@@ -24,7 +24,6 @@
 #include <vector>
 #include <cstdint>
 
-#pragma pack(push, 1)
 #include <throttr/protocol/value_type.hpp>
 #include <throttr/protocol/request_types.hpp>
 #include <throttr/protocol/entry_types.hpp>
@@ -32,6 +31,7 @@
 #include <throttr/protocol/attribute_types.hpp>
 #include <throttr/protocol/change_types.hpp>
 
+#pragma pack(push, 1)
 #include <throttr/protocol/requests/insert.hpp>
 #include <throttr/protocol/requests/query.hpp>
 #include <throttr/protocol/requests/update.hpp>
@@ -50,10 +50,10 @@
 #include <throttr/protocol/requests/channels.hpp>
 #include <throttr/protocol/requests/channel.hpp>
 #include <throttr/protocol/requests/whoami.hpp>
+#pragma pack(pop)
 
 #include <throttr/protocol/request_key.hpp>
 #include <throttr/protocol/request_key_hasher.hpp>
 #include <throttr/protocol/request_entry.hpp>
-#pragma pack(pop)
 
 #endif // THROTTR_PROTOCOL_HPP
