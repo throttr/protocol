@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include <throttr/protocol.hpp>
-#include <random>
 
 using namespace throttr;
 using namespace std::chrono;
@@ -91,11 +90,7 @@ TEST(RequestConnectionsTest, ParseAndSerialize) {
 
 TEST(RequestConnectionTest, ParseAndSerialize) {
     std::array<std::byte, 16> _uuid{};
-    std::random_device _rd;
-    std::mt19937 _gen(_rd());
-    for (auto &_b : _uuid) {
-        _b = static_cast<std::byte>(std::uniform_int_distribution(0, 255)(_gen));
-    }
+    _uuid.fill(std::byte{0x7F});
     auto _buffer = request_connection_builder(_uuid);
     const auto _request = request_connection::from_buffer(_buffer);
 
