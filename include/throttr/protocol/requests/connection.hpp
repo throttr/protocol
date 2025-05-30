@@ -16,8 +16,6 @@
 #ifndef THROTTR_PROTOCOL_REQUESTS_CONNECTION_HPP
 #define THROTTR_PROTOCOL_REQUESTS_CONNECTION_HPP
 
-#include <boost/uuid/uuid.hpp>
-
 namespace throttr {
     /**
      * Request connection header
@@ -31,7 +29,7 @@ namespace throttr {
         /**
          * ID
          */
-        boost::uuids::uuid id_;
+        std::array<std::byte, 16> id_;
     };
 
     /**
@@ -85,7 +83,7 @@ namespace throttr {
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_connection_builder(
-        const boost::uuids::uuid id
+        const std::array<std::byte, 16> &id
     ) {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_connection_header_size);

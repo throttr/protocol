@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g --coverage -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
 
-option(BUILD_PROTOCOL_TESTS "Build PROTOCOL tests" OFF)
+option(BUILD_PROTOCOL_TESTS "Build PROTOCOL tests" ON)
 
 add_library(throttr-protocol INTERFACE)
 target_include_directories(throttr-protocol INTERFACE
