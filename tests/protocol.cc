@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include <throttr/protocol.hpp>
-#include <boost/uuid/random_generator.hpp>
 
 using namespace throttr;
 using namespace std::chrono;
@@ -90,7 +89,9 @@ TEST(RequestConnectionsTest, ParseAndSerialize) {
 }
 
 TEST(RequestConnectionTest, ParseAndSerialize) {
-    auto _buffer = request_connection_builder(boost::uuids::random_generator()());
+    std::array<std::byte, 16> _uuid{};
+    _uuid.fill(std::byte{0x7F});
+    auto _buffer = request_connection_builder(_uuid);
     const auto _request = request_connection::from_buffer(_buffer);
 
     auto _reconstructed = _request.to_buffer();
