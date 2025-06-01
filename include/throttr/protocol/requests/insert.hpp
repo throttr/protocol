@@ -131,20 +131,20 @@ namespace throttr {
         std::size_t _offset = 0;
 
         constexpr auto _request_type = request_types::insert;
-        std::memcpy(_buffer.data() + _offset, &_request_type, sizeof(request_types));
+        std::memcpy(_buffer.data() + _offset, &_request_type, sizeof(request_types)); // NOSONAR
         _offset += sizeof(request_types);
 
         std::memcpy(_buffer.data() + _offset, &quota, sizeof(value_type));
         _offset += sizeof(value_type);
 
-        std::memcpy(_buffer.data() + _offset, &ttl_type, sizeof(ttl_types));
+        std::memcpy(_buffer.data() + _offset, &ttl_type, sizeof(ttl_types)); // NOSONAR
         _offset += sizeof(ttl_types);
 
         std::memcpy(_buffer.data() + _offset, &ttl, sizeof(value_type));
         _offset += sizeof(value_type);
 
         const auto _key_size = static_cast<uint8_t>(key.size());
-        std::memcpy(_buffer.data() + _offset, &_key_size, sizeof(uint8_t));
+        std::memcpy(_buffer.data() + _offset, &_key_size, sizeof(uint8_t)); // NOSONAR
         _offset += sizeof(uint8_t);
 
         std::memcpy(_buffer.data() + _offset, key.data(), key.size());

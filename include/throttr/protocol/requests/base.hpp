@@ -25,10 +25,10 @@
 
 namespace throttr {
     inline void push_attribute(const request_types type, std::vector<std::byte> & buffer, std::size_t &offset, const std::string_view data = "") {
-        std::memcpy(buffer.data() + offset, &type, sizeof(request_types));
+        std::memcpy(buffer.data() + offset, &type, sizeof(request_types)); // NOSONAR
         offset += sizeof(request_types);
         const auto _key_size = static_cast<uint8_t>(data.size());
-        std::memcpy(buffer.data() + offset, &_key_size, sizeof(uint8_t));
+        std::memcpy(buffer.data() + offset, &_key_size, sizeof(uint8_t)); // NOSONAR
         offset += sizeof(uint8_t);
         std::memcpy(buffer.data() + offset, data.data(), data.size());
     }

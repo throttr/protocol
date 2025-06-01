@@ -102,11 +102,11 @@ namespace throttr {
         std::size_t _offset = 0;
 
         constexpr auto _request_type = request_types::publish;
-        std::memcpy(_buffer.data() + _offset, &_request_type, sizeof(request_types));
+        std::memcpy(_buffer.data() + _offset, &_request_type, sizeof(request_types)); // NOSONAR
         _offset += sizeof(request_types);
 
         const auto _channel_size = static_cast<uint8_t>(channel.size());
-        std::memcpy(_buffer.data() + _offset, &_channel_size, sizeof(uint8_t));
+        std::memcpy(_buffer.data() + _offset, &_channel_size, sizeof(uint8_t)); // NOSONAR
         _offset += sizeof(uint8_t);
 
         const auto _buffer_size = static_cast<value_type>(buffer.size());
