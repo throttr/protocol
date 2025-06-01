@@ -30,7 +30,7 @@ namespace throttr {
     /**
      * Request connections header size
      */
-    constexpr std::size_t request_connections_header_size = sizeof(request_connections_header);
+    constexpr std::size_t request_connections_header_size = sizeof(request_types);
 
     /**
      * Request connections builder

@@ -35,7 +35,7 @@ namespace throttr {
     /**
      * Request stat header size
      */
-    constexpr std::size_t request_stat_header_size = sizeof(request_stat_header);
+    constexpr std::size_t request_stat_header_size = sizeof(request_types) + sizeof(uint8_t);
 
 
     /**
@@ -72,14 +72,20 @@ namespace throttr {
         const std::string_view key = ""
         ) {
         std::vector<std::byte> _buffer;
-        _buffer.resize(request_stat_header_size + key.size());
+        const std::size_t _total_size = sizeof(request_types) + sizeof(uint8_t) + key.size();
+        _buffer.resize(_total_size);
 
-        request_stat_header _header{};
-        _header.request_type_ = request_types::stat;
-        _header.key_size_ = static_cast<uint8_t>(key.size());
+        std::size_t _offset = 0;
 
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-        std::memcpy(_buffer.data() + request_stat_header_size, key.data(), key.size());
+        constexpr auto _request_type = request_types::stat;
+        std::memcpy(_buffer.data() + _offset, &_request_type, sizeof(request_types));
+        _offset += sizeof(request_types);
+
+        const auto _key_size = static_cast<uint8_t>(key.size());
+        std::memcpy(_buffer.data() + _offset, &_key_size, sizeof(uint8_t));
+        _offset += sizeof(uint8_t);
+
+        std::memcpy(_buffer.data() + _offset, key.data(), key.size());
 
         return _buffer;
     }

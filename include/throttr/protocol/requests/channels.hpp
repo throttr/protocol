@@ -30,7 +30,7 @@ namespace throttr {
     /**
      * Request channels header size
      */
-    constexpr std::size_t request_channels_header_size = sizeof(request_channels_header);
+    constexpr std::size_t request_channels_header_size = sizeof(request_types);
 
     /**
      * Request channels builder

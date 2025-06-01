@@ -17,6 +17,8 @@
 #define THROTTR_PROTOCOL_REQUESTS_CONNECTION_HPP
 
 namespace throttr {
+    constexpr std::size_t request_connection_id_size = 16;
+
     /**
      * Request connection header
      */
@@ -29,13 +31,13 @@ namespace throttr {
         /**
          * ID
          */
-        std::array<std::byte, 16> id_{};
+        std::array<std::byte, request_connection_id_size> id_{};
     };
 
     /**
      * Request connection header size
      */
-    constexpr std::size_t request_connection_header_size = sizeof(request_connection_header);
+    constexpr std::size_t request_connection_header_size = sizeof(request_types) + request_connection_id_size;
 
 
     /**
@@ -51,7 +53,7 @@ namespace throttr {
          * @return request_connection
          */
         static request_connection from_buffer(const std::span<const std::byte> &buffer) {
-            const auto _id_span = std::span<const std::byte, 16>(
+            const auto _id_span = std::span<const std::byte, request_connection_id_size>(
                 buffer.data() + 1, 16
             );
 
@@ -68,7 +70,7 @@ namespace throttr {
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_connection_builder(
-        const std::array<std::byte, 16> &id
+        const std::array<std::byte, request_connection_id_size> &id
     ) {
         return {
             static_cast<std::byte>(request_types::connection),

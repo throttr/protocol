@@ -30,7 +30,7 @@ namespace throttr {
     /**
      * Request info header size
      */
-    constexpr std::size_t request_info_header_size = sizeof(request_info_header);
+    constexpr std::size_t request_info_header_size = sizeof(request_types);
 
     /**
      * Request info builder
