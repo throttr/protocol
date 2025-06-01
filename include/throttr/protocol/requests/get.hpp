@@ -76,16 +76,7 @@ namespace throttr {
 
         std::size_t _offset = 0;
 
-        constexpr auto _request_type = request_types::get;
-        std::memcpy(_buffer.data() + _offset, &_request_type, sizeof(request_types));
-        _offset += sizeof(request_types);
-
-        const auto _key_size = static_cast<uint8_t>(key.size());
-        std::memcpy(_buffer.data() + _offset, &_key_size, sizeof(uint8_t));
-        _offset += sizeof(uint8_t);
-
-        std::memcpy(_buffer.data() + _offset, key.data(), key.size());
-
+        push_attribute(request_types::get, _buffer, _offset, key);
         return _buffer;
     }
 }
