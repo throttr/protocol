@@ -30,7 +30,7 @@ namespace throttr {
     /**
      * Request whoami header size
      */
-    constexpr std::size_t request_whoami_header_size = sizeof(request_whoami_header);
+    constexpr std::size_t request_whoami_header_size = sizeof(request_types);
 
     /**
      * Request whoami builder

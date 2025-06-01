@@ -50,7 +50,7 @@ namespace throttr {
     /**
      * Request insert header size
      */
-    constexpr std::size_t request_insert_header_size = sizeof(request_insert_header);
+    constexpr std::size_t request_insert_header_size = sizeof(request_types) + sizeof(ttl_types) + sizeof(uint8_t) + sizeof(value_type) * 2;
 
     /**
      * Request insert
@@ -125,18 +125,29 @@ namespace throttr {
         const std::string_view key = ""
     ) {
         std::vector<std::byte> _buffer;
-        _buffer.resize(request_insert_header_size + key.size());
+        const std::size_t _total_size = sizeof(request_types) + sizeof(ttl_types) + sizeof(uint8_t) + key.size() + sizeof(value_type) * 2;
+        _buffer.resize(_total_size);
 
+        std::size_t _offset = 0;
 
-        request_insert_header _header{};
-        _header.request_type_ = request_types::insert;
-        _header.quota_ = quota;
-        _header.ttl_type_ = ttl_type;
-        _header.ttl_ = ttl;
-        _header.key_size_ = static_cast<uint8_t>(key.size());
+        constexpr auto _request_type = request_types::insert;
+        std::memcpy(_buffer.data() + _offset, &_request_type, sizeof(request_types)); // NOSONAR
+        _offset += sizeof(request_types);
 
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-        std::memcpy(_buffer.data() + request_insert_header_size, key.data(), key.size());
+        std::memcpy(_buffer.data() + _offset, &quota, sizeof(value_type));
+        _offset += sizeof(value_type);
+
+        std::memcpy(_buffer.data() + _offset, &ttl_type, sizeof(ttl_types)); // NOSONAR
+        _offset += sizeof(ttl_types);
+
+        std::memcpy(_buffer.data() + _offset, &ttl, sizeof(value_type));
+        _offset += sizeof(value_type);
+
+        const auto _key_size = static_cast<uint8_t>(key.size());
+        std::memcpy(_buffer.data() + _offset, &_key_size, sizeof(uint8_t)); // NOSONAR
+        _offset += sizeof(uint8_t);
+
+        std::memcpy(_buffer.data() + _offset, key.data(), key.size());
 
         return _buffer;
     }

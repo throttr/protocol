@@ -35,7 +35,7 @@ namespace throttr {
     /**
      * Request get header size
      */
-    constexpr std::size_t request_get_header_size = sizeof(request_get_header);
+    constexpr std::size_t request_get_header_size = sizeof(request_types) + sizeof(uint8_t);
 
     /**
      * Request get
@@ -71,15 +71,12 @@ namespace throttr {
         const std::string_view key = ""
     ) {
         std::vector<std::byte> _buffer;
-        _buffer.resize(request_get_header_size + key.size());
+        const std::size_t _total_size = sizeof(request_types) + sizeof(uint8_t) + key.size();
+        _buffer.resize(_total_size);
 
-        request_get_header _header{};
-        _header.request_type_ = request_types::get;
-        _header.key_size_ = static_cast<uint8_t>(key.size());
+        std::size_t _offset = 0;
 
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-        std::memcpy(_buffer.data() + request_get_header_size, key.data(), key.size());
-
+        push_attribute(request_types::get, _buffer, _offset, key);
         return _buffer;
     }
 }

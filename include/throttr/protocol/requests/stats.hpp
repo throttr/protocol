@@ -30,7 +30,7 @@ namespace throttr {
     /**
      * Request stats header size
      */
-    constexpr std::size_t request_stats_header_size = sizeof(request_stats_header);
+    constexpr std::size_t request_stats_header_size = sizeof(request_types);
 
     /**
      * Request stats builder

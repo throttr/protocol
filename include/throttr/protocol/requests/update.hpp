@@ -50,7 +50,7 @@ namespace throttr {
     /**
      * Request update header size
      */
-    constexpr std::size_t request_update_header_size = sizeof(request_update_header);
+    constexpr std::size_t request_update_header_size = sizeof(request_types) + sizeof(attribute_types) + sizeof(change_types) + sizeof(value_type) + sizeof(uint8_t);
 
 
     /**
@@ -131,17 +131,29 @@ namespace throttr {
         const std::string_view key = ""
         ) {
         std::vector<std::byte> _buffer;
-        _buffer.resize(request_update_header_size + key.size());
+        const std::size_t _total_size = sizeof(request_types) + sizeof(attribute_types) + sizeof(change_types) + sizeof(value_type) + sizeof(uint8_t) + key.size();
+        _buffer.resize(_total_size);
 
-        request_update_header _header{};
-        _header.request_type_ = request_types::update;
-        _header.attribute_ = attribute;
-        _header.change_ = change;
-        _header.value_ = value;
-        _header.key_size_ = static_cast<uint8_t>(key.size());
+        std::size_t _offset = 0;
 
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-        std::memcpy(_buffer.data() + request_update_header_size, key.data(), key.size());
+        constexpr auto _request_type = request_types::update;
+        std::memcpy(_buffer.data() + _offset, &_request_type, sizeof(request_types)); // NOSONAR
+        _offset += sizeof(request_types);
+
+        std::memcpy(_buffer.data() + _offset, &attribute, sizeof(attribute_types)); // NOSONAR
+        _offset += sizeof(attribute_types);
+
+        std::memcpy(_buffer.data() + _offset, &change, sizeof(change_types)); // NOSONAR
+        _offset += sizeof(change_types);
+
+        std::memcpy(_buffer.data() + _offset, &value, sizeof(value_type));
+        _offset += sizeof(value_type);
+
+        const auto _key_size = static_cast<uint8_t>(key.size());
+        std::memcpy(_buffer.data() + _offset, &_key_size, sizeof(uint8_t)); // NOSONAR
+        _offset += sizeof(uint8_t);
+
+        std::memcpy(_buffer.data() + _offset, key.data(), key.size());
 
         return _buffer;
     }

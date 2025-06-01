@@ -16,6 +16,8 @@
 #ifndef THROTTR_PROTOCOL_REQUESTS_QUERY_HPP
 #define THROTTR_PROTOCOL_REQUESTS_QUERY_HPP
 
+#include <throttr/protocol/requests/base.hpp>
+
 namespace throttr {
     /**
      * Request query header
@@ -72,15 +74,12 @@ namespace throttr {
         const std::string_view key = ""
     ) {
         std::vector<std::byte> _buffer;
-        _buffer.resize(request_query_header_size + key.size());
+        const std::size_t _total_size = sizeof(request_types) + sizeof(uint8_t) + key.size();
+        _buffer.resize(_total_size);
 
-        request_query_header _header{};
-        _header.request_type_ = request_types::query;
-        _header.key_size_ = static_cast<uint8_t>(key.size());
+        std::size_t _offset = 0;
 
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-        std::memcpy(_buffer.data() + request_query_header_size, key.data(), key.size());
-
+        push_attribute(request_types::query, _buffer, _offset, key);
         return _buffer;
     }
 }

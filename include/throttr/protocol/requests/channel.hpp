@@ -35,7 +35,7 @@ namespace throttr {
     /**
      * Request channel header size
      */
-    constexpr std::size_t request_channel_header_size = sizeof(request_channel_header);
+    constexpr std::size_t request_channel_header_size = sizeof(request_types) + sizeof(uint8_t);
 
     /**
      * Request channel
@@ -71,15 +71,12 @@ namespace throttr {
         const std::string_view channel = ""
     ) {
         std::vector<std::byte> _buffer;
-        _buffer.resize(request_channel_header_size + channel.size());
+        const std::size_t _total_size = sizeof(request_types) + sizeof(uint8_t) + channel.size();
+        _buffer.resize(_total_size);
 
-        request_channel_header _header {};
-        _header.request_type_ = request_types::channel;
-        _header.channel_size_ = static_cast<uint8_t>(channel.size());
+        std::size_t _offset = 0;
 
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-        std::memcpy(_buffer.data() + request_channel_header_size, channel.data(), channel.size());
-
+        push_attribute(request_types::channel, _buffer, _offset, channel);
         return _buffer;
     }
 }
