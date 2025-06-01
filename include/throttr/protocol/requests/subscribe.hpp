@@ -96,10 +96,11 @@ namespace throttr {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_subscribe_header_size + channel.size());
 
-        auto *_header = reinterpret_cast<request_subscribe_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::subscribe;
-        _header->channel_size_ = static_cast<uint8_t>(channel.size());
+        request_subscribe_header _header{};
+        _header.request_type_ = request_types::subscribe;
+        _header.channel_size_ = static_cast<uint8_t>(channel.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_subscribe_header_size, channel.data(), channel.size());
 
         return _buffer;

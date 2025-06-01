@@ -93,14 +93,15 @@ namespace throttr {
      */
     inline std::vector<std::byte> request_stat_builder(
         const std::string_view key = ""
-    ) {
+        ) {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_stat_header_size + key.size());
 
-        auto *_header = reinterpret_cast<request_stat_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::stat;
-        _header->key_size_ = static_cast<uint8_t>(key.size());
+        request_stat_header _header{};
+        _header.request_type_ = request_types::stat;
+        _header.key_size_ = static_cast<uint8_t>(key.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_stat_header_size, key.data(), key.size());
 
         return _buffer;

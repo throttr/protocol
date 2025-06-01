@@ -121,17 +121,18 @@ namespace throttr {
         const ttl_types ttl_type = ttl_types::milliseconds,
         const value_type ttl = 0,
         const std::string_view key = ""
-    ) {
+        ) {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_set_header_size + key.size() + buffer.size());
 
-        auto *_header = reinterpret_cast<request_set_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::set;
-        _header->ttl_type_ = ttl_type;
-        _header->ttl_ = ttl;
-        _header->key_size_ = static_cast<uint8_t>(key.size());
-        _header->value_size_ = static_cast<value_type>(buffer.size());
+        request_set_header _header{};
+        _header.request_type_ = request_types::set;
+        _header.ttl_type_ = ttl_type;
+        _header.ttl_ = ttl;
+        _header.key_size_ = static_cast<uint8_t>(key.size());
+        _header.value_size_ = static_cast<value_type>(buffer.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_set_header_size, key.data(), key.size());
         std::memcpy(
             _buffer.data() + request_set_header_size + key.size(),

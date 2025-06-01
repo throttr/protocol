@@ -88,9 +88,11 @@ namespace throttr {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_connection_header_size);
 
-        auto *_header = reinterpret_cast<request_connection_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::connection;
-        _header->id_ = id;
+        request_connection_header _header{};
+        _header.request_type_ = request_types::connection;
+        _header.id_ = id;
+
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
 
         return _buffer;
     }

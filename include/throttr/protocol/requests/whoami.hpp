@@ -79,8 +79,10 @@ namespace throttr {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_whoami_header_size);
 
-        auto *_header = reinterpret_cast<request_whoami_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::whoami;
+        request_whoami_header _header{};
+        _header.request_type_ = request_types::whoami;
+
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
 
         return _buffer;
     }

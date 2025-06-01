@@ -92,14 +92,15 @@ namespace throttr {
      */
     inline std::vector<std::byte> request_unsubscribe_builder(
         const std::string_view channel = ""
-    ) {
+        ) {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_unsubscribe_header_size + channel.size());
 
-        auto *_header = reinterpret_cast<request_unsubscribe_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::unsubscribe;
-        _header->channel_size_ = static_cast<uint8_t>(channel.size());
+        request_unsubscribe_header _header{};
+        _header.request_type_ = request_types::unsubscribe;
+        _header.channel_size_ = static_cast<uint8_t>(channel.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_unsubscribe_header_size, channel.data(), channel.size());
 
         return _buffer;

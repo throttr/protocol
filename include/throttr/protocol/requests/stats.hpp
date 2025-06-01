@@ -80,8 +80,10 @@ namespace throttr {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_stats_header_size);
 
-        auto *_header = reinterpret_cast<request_stats_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::stats;
+        request_stats_header _header{};
+        _header.request_type_ = request_types::stats;
+
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
 
         return _buffer;
     }

@@ -115,17 +115,18 @@ namespace throttr {
         const change_types change = change_types::patch,
         const value_type value = 0,
         const std::string_view key = ""
-    ) {
+        ) {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_update_header_size + key.size());
 
-        auto *_header = reinterpret_cast<request_update_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::update;
-        _header->attribute_ = attribute;
-        _header->change_ = change;
-        _header->value_ = value;
-        _header->key_size_ = static_cast<uint8_t>(key.size());
+        request_update_header _header{};
+        _header.request_type_ = request_types::update;
+        _header.attribute_ = attribute;
+        _header.change_ = change;
+        _header.value_ = value;
+        _header.key_size_ = static_cast<uint8_t>(key.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_update_header_size, key.data(), key.size());
 
         return _buffer;

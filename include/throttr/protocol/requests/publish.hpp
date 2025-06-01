@@ -111,11 +111,12 @@ namespace throttr {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_publish_header_size + channel.size() + buffer.size());
 
-        auto *_header = reinterpret_cast<request_publish_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::publish;
-        _header->channel_size_ = static_cast<uint8_t>(channel.size());
-        _header->value_size_ = static_cast<value_type>(buffer.size());
+        request_publish_header _header{};
+        _header.request_type_ = request_types::publish;
+        _header.channel_size_ = static_cast<uint8_t>(channel.size());
+        _header.value_size_ = static_cast<value_type>(buffer.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_publish_header_size, channel.data(), channel.size());
         std::memcpy(
             _buffer.data() + request_publish_header_size + channel.size(),

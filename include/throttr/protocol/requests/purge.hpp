@@ -97,10 +97,11 @@ namespace throttr {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_purge_header_size + key.size());
 
-        auto *_header = reinterpret_cast<request_purge_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::purge;
-        _header->key_size_ = static_cast<uint8_t>(key.size());
+        request_purge_header _header{};
+        _header.request_type_ = request_types::purge;
+        _header.key_size_ = static_cast<uint8_t>(key.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_purge_header_size, key.data(), key.size());
 
         return _buffer;
