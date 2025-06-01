@@ -125,7 +125,7 @@ namespace throttr {
         const std::string_view key = ""
     ) {
         std::vector<std::byte> _buffer;
-        const std::size_t _total_size = sizeof(request_types) + sizeof(value_type) * 2 + sizeof(uint8_t) + key.size();
+        const std::size_t _total_size = sizeof(request_types) + sizeof(ttl_types) + sizeof(uint8_t) + key.size() + sizeof(value_type) * 2;
         _buffer.resize(_total_size);
 
         std::size_t _offset = 0;
