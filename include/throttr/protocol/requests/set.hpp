@@ -57,14 +57,19 @@ namespace throttr {
      */
     struct request_set {
         /**
-         * Header
+         * TTL
          */
-        const request_set_header *header_ = nullptr;
+        std::span<const std::byte> ttl_;
+
+        /**
+         * TTL Type
+         */
+        ttl_types ttl_type_;
 
         /**
          * Key ID
          */
-        std::string_view key_;
+        std::span<const std::byte> key_;
 
         /**
          * Value
@@ -78,32 +83,32 @@ namespace throttr {
          * @return request_set
          */
         static request_set from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_set_header *>(buffer.data()); // NOSONAR
-            const auto _key = buffer.subspan(request_set_header_size, _header->key_size_);
-            const auto _value = buffer.subspan(request_set_header_size + _header->key_size_, _header->value_size_);
+            std::size_t _offset = 1;
+
+            const auto _ttl_type = static_cast<ttl_types>(std::to_integer<uint8_t>(buffer[_offset]));
+            _offset++;
+
+            const auto _ttl = buffer.subspan(_offset, sizeof(value_type));
+            _offset += sizeof(value_type);
+
+            const auto _key_size = std::to_integer<uint8_t>(buffer[_offset]);
+            _offset++;
+
+            value_type _value_size = 0;
+            std::memcpy(&_value_size, buffer.data() + _offset, sizeof(value_type));
+            _offset += sizeof(value_type);
+
+            const auto _key = buffer.subspan(_offset, _key_size);
+            _offset += _key_size;
+
+            const auto _value = buffer.subspan(_offset, _value_size);
 
             return request_set{
-                _header,
-                std::string_view(reinterpret_cast<const char *>(_key.data()), _key.size()), // NOSONAR
-                _value,
+                _ttl,
+                _ttl_type,
+                _key,
+                _value
             };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_set_header_size + key_.size() + value_.size());
-
-            std::memcpy(_buffer.data(), header_, request_set_header_size);
-            std::memcpy(_buffer.data() + request_set_header_size, key_.data(), key_.size());
-            std::memcpy(_buffer.data() + request_set_header_size + key_.size(), value_.data(), value_.size());
-
-            return _buffer;
         }
     };
 

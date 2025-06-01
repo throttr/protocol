@@ -33,44 +33,6 @@ namespace throttr {
     constexpr std::size_t request_connections_header_size = sizeof(request_connections_header);
 
     /**
-     * Request connections
-     */
-    struct request_connections {
-        /**
-         * Header
-         */
-        const request_connections_header *header_ = nullptr;
-
-        /**
-         * From buffer
-         *
-         * @param buffer
-         * @return request_connections
-         */
-        static request_connections from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_connections_header *>(buffer.data()); // NOSONAR
-
-            return request_connections{
-                _header
-            };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_connections_header_size);
-
-            std::memcpy(_buffer.data(), header_, request_connections_header_size);
-            return _buffer;
-        }
-    };
-
-    /**
      * Request connections builder
      *
      * @return std::vector<std::byte>

@@ -33,44 +33,6 @@ namespace throttr {
     constexpr std::size_t request_whoami_header_size = sizeof(request_whoami_header);
 
     /**
-     * Request whoami
-     */
-    struct request_whoami {
-        /**
-         * Header
-         */
-        const request_whoami_header *header_ = nullptr;
-
-        /**
-         * From buffer
-         *
-         * @param buffer
-         * @return request_whoami
-         */
-        static request_whoami from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_whoami_header *>(buffer.data()); // NOSONAR
-
-            return request_whoami{
-                _header
-            };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_whoami_header_size);
-
-            std::memcpy(_buffer.data(), header_, request_whoami_header_size);
-            return _buffer;
-        }
-    };
-
-    /**
      * Request whoami builder
      *
      * @return std::vector<std::byte>

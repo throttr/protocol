@@ -32,45 +32,6 @@ namespace throttr {
      */
     constexpr std::size_t request_stats_header_size = sizeof(request_stats_header);
 
-
-    /**
-     * Request stats
-     */
-    struct request_stats {
-        /**
-         * Header
-         */
-        const request_stats_header *header_ = nullptr;
-
-        /**
-         * From buffer
-         *
-         * @param buffer
-         * @return request_stats
-         */
-        static request_stats from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_stats_header *>(buffer.data()); // NOSONAR
-
-            return request_stats{
-                _header
-            };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_stats_header_size);
-
-            std::memcpy(_buffer.data(), header_, request_stats_header_size);
-            return _buffer;
-        }
-    };
-
     /**
      * Request stats builder
      *

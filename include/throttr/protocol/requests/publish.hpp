@@ -47,14 +47,9 @@ namespace throttr {
      */
     struct request_publish {
         /**
-         * Header
-         */
-        const request_publish_header *header_ = nullptr;
-
-        /**
          * Channel
          */
-        std::string_view channel_;
+        std::span<const std::byte> channel_;
 
         /**
          * Value
@@ -68,32 +63,24 @@ namespace throttr {
          * @return request_publish
          */
         static request_publish from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_publish_header *>(buffer.data()); // NOSONAR
-            const auto _channel = buffer.subspan(request_publish_header_size, _header->channel_size_);
-            const auto _value = buffer.subspan(request_publish_header_size + _header->channel_size_, _header->value_size_);
+            std::size_t _offset = 1;
+
+            const auto _channel_size = std::to_integer<uint8_t>(buffer[_offset]);
+            _offset++;
+
+            value_type _value_size = 0;
+            std::memcpy(&_value_size, buffer.data() + _offset, sizeof(value_type));
+            _offset += sizeof(value_type);
+
+            const auto _channel = buffer.subspan(_offset, _channel_size);
+            _offset += _channel_size;
+
+            const auto _value = buffer.subspan(_offset, _value_size);
 
             return request_publish{
-                _header,
-                std::string_view(reinterpret_cast<const char *>(_channel.data()), _channel.size()), // NOSONAR
-                _value,
+                _channel,
+                _value
             };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_publish_header_size + channel_.size() + value_.size());
-
-            std::memcpy(_buffer.data(), header_, request_publish_header_size);
-            std::memcpy(_buffer.data() + request_publish_header_size, channel_.data(), channel_.size());
-            std::memcpy(_buffer.data() + request_publish_header_size + channel_.size(), value_.data(), value_.size());
-
-            return _buffer;
         }
     };
 

@@ -33,44 +33,6 @@ namespace throttr {
     constexpr std::size_t request_list_header_size = sizeof(request_list_header);
 
     /**
-     * Request list
-     */
-    struct request_list {
-        /**
-         * Header
-         */
-        const request_list_header *header_ = nullptr;
-
-        /**
-         * From buffer
-         *
-         * @param buffer
-         * @return request_list
-         */
-        static request_list from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_list_header *>(buffer.data()); // NOSONAR
-
-            return request_list{
-                _header
-            };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_list_header_size);
-
-            std::memcpy(_buffer.data(), header_, request_list_header_size);
-            return _buffer;
-        }
-    };
-
-    /**
      * Request list builder
      *
      * @return std::vector<std::byte>
