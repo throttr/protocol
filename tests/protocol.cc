@@ -28,7 +28,7 @@ uint64_t extract_value(const std::span<const std::byte>& span) {
 }
 
 std::string_view span_to_string_view(const std::span<const std::byte>& span) {
-    return {reinterpret_cast<const char*>(span.data()), span.size()};
+    return {reinterpret_cast<const char*>(span.data()), span.size()}; // NOSONAR
 }
 
 TEST(RequestInsertTest, ParseAndSerialize) {
