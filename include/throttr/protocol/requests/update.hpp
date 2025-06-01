@@ -100,7 +100,8 @@ namespace throttr {
             std::memcpy(&_value, buffer.data() + _offset, sizeof(value_type));
             _offset += sizeof(value_type);
 
-            const auto _key_size = std::to_integer<uint8_t>(buffer[_offset++]);
+            const auto _key_size = std::to_integer<uint8_t>(buffer[_offset]);
+            _offset++;
 
             const auto _key = buffer.subspan(_offset, _key_size);
 
