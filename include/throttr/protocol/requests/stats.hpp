@@ -32,58 +32,15 @@ namespace throttr {
      */
     constexpr std::size_t request_stats_header_size = sizeof(request_stats_header);
 
-
-    /**
-     * Request stats
-     */
-    struct request_stats {
-        /**
-         * Header
-         */
-        const request_stats_header *header_ = nullptr;
-
-        /**
-         * From buffer
-         *
-         * @param buffer
-         * @return request_stats
-         */
-        static request_stats from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_stats_header *>(buffer.data()); // NOSONAR
-
-            return request_stats{
-                _header
-            };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_stats_header_size);
-
-            std::memcpy(_buffer.data(), header_, request_stats_header_size);
-            return _buffer;
-        }
-    };
-
     /**
      * Request stats builder
      *
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_stats_builder() {
-        std::vector<std::byte> _buffer;
-        _buffer.resize(request_stats_header_size);
-
-        auto *_header = reinterpret_cast<request_stats_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::stats;
-
-        return _buffer;
+        return {
+            static_cast<std::byte>(request_types::stats)
+        };
     }
 }
 

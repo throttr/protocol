@@ -43,14 +43,9 @@ namespace throttr {
      */
     struct request_stat {
         /**
-         * Header
-         */
-        const request_stat_header *header_ = nullptr;
-
-        /**
          * Key
          */
-        std::string_view key_;
+        std::span<const std::byte> key_;
 
         /**
          * From buffer
@@ -59,29 +54,11 @@ namespace throttr {
          * @return request_stat
          */
         static request_stat from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_stat_header *>(buffer.data()); // NOSONAR
-            const auto _key = buffer.subspan(request_stat_header_size, _header->key_size_);
-
+            const auto _key_size = std::to_integer<uint8_t>(buffer[1]);
+            const auto _key = buffer.subspan(request_stat_header_size, _key_size);
             return request_stat{
-                _header,
-                std::string_view(reinterpret_cast<const char *>(_key.data()), _key.size()), // NOSONAR
+                _key
             };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_stat_header_size + key_.size());
-
-            std::memcpy(_buffer.data(), header_, request_stat_header_size);
-            std::memcpy(_buffer.data() + request_stat_header_size, key_.data(), key_.size());
-
-            return _buffer;
         }
     };
 
@@ -93,14 +70,15 @@ namespace throttr {
      */
     inline std::vector<std::byte> request_stat_builder(
         const std::string_view key = ""
-    ) {
+        ) {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_stat_header_size + key.size());
 
-        auto *_header = reinterpret_cast<request_stat_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::stat;
-        _header->key_size_ = static_cast<uint8_t>(key.size());
+        request_stat_header _header{};
+        _header.request_type_ = request_types::stat;
+        _header.key_size_ = static_cast<uint8_t>(key.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_stat_header_size, key.data(), key.size());
 
         return _buffer;

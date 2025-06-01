@@ -42,14 +42,9 @@ namespace throttr {
      */
     struct request_unsubscribe {
         /**
-         * Header
-         */
-        const request_unsubscribe_header *header_ = nullptr;
-
-        /**
          * Channel
          */
-        std::string_view channel_;
+        std::span<const std::byte> channel_;
 
         /**
          * From buffer
@@ -58,29 +53,11 @@ namespace throttr {
          * @return request_unsubscribe
          */
         static request_unsubscribe from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_unsubscribe_header *>(buffer.data()); // NOSONAR
-            const auto _channel = buffer.subspan(request_unsubscribe_header_size, _header->channel_size_);
-
+            const auto _channel_size = std::to_integer<uint8_t>(buffer[1]);
+            const auto _channel_span = buffer.subspan(request_unsubscribe_header_size, _channel_size);
             return request_unsubscribe{
-                _header,
-                std::string_view(reinterpret_cast<const char *>(_channel.data()), _channel.size()), // NOSONAR
+                _channel_span
             };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_unsubscribe_header_size + channel_.size());
-
-            std::memcpy(_buffer.data(), header_, request_unsubscribe_header_size);
-            std::memcpy(_buffer.data() + request_unsubscribe_header_size, channel_.data(), channel_.size());
-
-            return _buffer;
         }
     };
 
@@ -92,14 +69,15 @@ namespace throttr {
      */
     inline std::vector<std::byte> request_unsubscribe_builder(
         const std::string_view channel = ""
-    ) {
+        ) {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_unsubscribe_header_size + channel.size());
 
-        auto *_header = reinterpret_cast<request_unsubscribe_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::unsubscribe;
-        _header->channel_size_ = static_cast<uint8_t>(channel.size());
+        request_unsubscribe_header _header{};
+        _header.request_type_ = request_types::unsubscribe;
+        _header.channel_size_ = static_cast<uint8_t>(channel.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_unsubscribe_header_size, channel.data(), channel.size());
 
         return _buffer;

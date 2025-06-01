@@ -33,56 +33,14 @@ namespace throttr {
     constexpr std::size_t request_channels_header_size = sizeof(request_channels_header);
 
     /**
-     * Request channels
-     */
-    struct request_channels {
-        /**
-         * Header
-         */
-        const request_channels_header *header_ = nullptr;
-
-        /**
-         * From buffer
-         *
-         * @param buffer
-         * @return request_channels
-         */
-        static request_channels from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_channels_header *>(buffer.data()); // NOSONAR
-
-            return request_channels{
-                _header
-            };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_channels_header_size);
-
-            std::memcpy(_buffer.data(), header_, request_channels_header_size);
-            return _buffer;
-        }
-    };
-
-    /**
      * Request channels builder
      *
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_channels_builder() {
-        std::vector<std::byte> _buffer;
-        _buffer.resize(request_channels_header_size);
-
-        auto *_header = reinterpret_cast<request_channels_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::channels;
-
-        return _buffer;
+        return {
+            static_cast<std::byte>(request_types::channels)
+        };
     }
 }
 

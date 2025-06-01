@@ -43,14 +43,9 @@ namespace throttr {
      */
     struct request_purge {
         /**
-         * Header
-         */
-        const request_purge_header *header_ = nullptr;
-
-        /**
          * Key
          */
-        std::string_view key_;
+        std::span<const std::byte> key_;
 
         /**
          * From buffer
@@ -59,29 +54,11 @@ namespace throttr {
          * @return request_purge
          */
         static request_purge from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_purge_header *>(buffer.data()); // NOSONAR
-            const auto _key = buffer.subspan(request_purge_header_size, _header->key_size_);
-
+            const auto _key_size = std::to_integer<uint8_t>(buffer[1]);
+            const auto _key = buffer.subspan(request_purge_header_size, _key_size);
             return request_purge{
-                _header,
-                std::string_view(reinterpret_cast<const char *>(_key.data()), _key.size()), // NOSONAR
+                _key
             };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_purge_header_size + key_.size());
-
-            std::memcpy(_buffer.data(), header_, request_purge_header_size);
-            std::memcpy(_buffer.data() + request_purge_header_size, key_.data(), key_.size());
-
-            return _buffer;
         }
     };
 
@@ -97,10 +74,11 @@ namespace throttr {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_purge_header_size + key.size());
 
-        auto *_header = reinterpret_cast<request_purge_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::purge;
-        _header->key_size_ = static_cast<uint8_t>(key.size());
+        request_purge_header _header{};
+        _header.request_type_ = request_types::purge;
+        _header.key_size_ = static_cast<uint8_t>(key.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_purge_header_size, key.data(), key.size());
 
         return _buffer;

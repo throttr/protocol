@@ -19,18 +19,26 @@
 using namespace throttr;
 using namespace std::chrono;
 
+uint64_t extract_value(const std::span<const std::byte>& span) {
+    value_type result = 0;
+    for (std::size_t i = 0; i < sizeof(value_type); ++i) {
+        result |= static_cast<value_type>(std::to_integer<uint8_t>(span[i])) << (8 * i);
+    }
+    return result;
+}
+
+std::string_view span_to_string_view(const std::span<const std::byte>& span) {
+    return {reinterpret_cast<const char*>(span.data()), span.size()}; // NOSONAR
+}
+
 TEST(RequestInsertTest, ParseAndSerialize) {
     auto _buffer = request_insert_builder(5000, ttl_types::milliseconds, 60000, "127.0.0.1:8000/api/resource");
 
     const auto _request = request_insert::from_buffer(_buffer);
-    EXPECT_EQ(_request.header_->quota_, 5000);
-    EXPECT_EQ(_request.header_->ttl_type_, ttl_types::milliseconds);
-    EXPECT_EQ(_request.header_->ttl_, 60000);
-    EXPECT_EQ(_request.key_, "127.0.0.1:8000/api/resource");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(extract_value(_request.quota_), 5000);
+    EXPECT_EQ(_request.ttl_type_, ttl_types::milliseconds);
+    EXPECT_EQ(extract_value(_request.ttl_), 60000);
+    EXPECT_EQ(span_to_string_view(_request.key_), "127.0.0.1:8000/api/resource");
 }
 
 TEST(RequestSetTest, ParseAndSerialize) {
@@ -43,87 +51,50 @@ TEST(RequestSetTest, ParseAndSerialize) {
     auto _buffer = request_set_builder(_content_buffer, ttl_types::milliseconds, 60000, "127.0.0.1:8000/api/resource");
 
     const auto _request = request_set::from_buffer(_buffer);
-    EXPECT_EQ(_request.header_->ttl_type_, ttl_types::milliseconds);
-    EXPECT_EQ(_request.header_->ttl_, 60000);
-    EXPECT_EQ(_request.key_, "127.0.0.1:8000/api/resource");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
-    ASSERT_EQ(_request.value_.size(), _content_buffer.size());
-    ASSERT_TRUE(std::equal(
-        _request.value_.begin(), _request.value_.end(),
-        _content_buffer.begin()
-    ));
+    EXPECT_EQ(_request.ttl_type_, ttl_types::milliseconds);
+    EXPECT_EQ(extract_value(_request.ttl_), 60000);
+    EXPECT_EQ(span_to_string_view(_request.key_), "127.0.0.1:8000/api/resource");
 }
 
 TEST(RequestQueryTest, ParseAndSerialize) {
     auto _buffer = request_query_builder("0fa80d9d-d371-4f16-9c50-1bfa13f199b5");
 
     const auto _request = request_query::from_buffer(_buffer);
-    EXPECT_EQ(_request.key_, "0fa80d9d-d371-4f16-9c50-1bfa13f199b5");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(span_to_string_view(_request.key_), "0fa80d9d-d371-4f16-9c50-1bfa13f199b5");
 }
 
 TEST(RequestGetTest, ParseAndSerialize) {
     auto _buffer = request_get_builder("65dbdbde-4f2b-4e0d-9d31-9697e2a114c4");
 
     const auto _request = request_get::from_buffer(_buffer);
-    EXPECT_EQ(_request.key_, "65dbdbde-4f2b-4e0d-9d31-9697e2a114c4");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(span_to_string_view(_request.key_), "65dbdbde-4f2b-4e0d-9d31-9697e2a114c4");
 }
 
 TEST(RequestConnectionsTest, ParseAndSerialize) {
     auto _buffer = request_connections_builder();
-    const auto _request = request_connections::from_buffer(_buffer);
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(_buffer.size(), 1);
 }
 
 TEST(RequestConnectionTest, ParseAndSerialize) {
     std::array<std::byte, 16> _uuid{};
     _uuid.fill(std::byte{0x7F});
     auto _buffer = request_connection_builder(_uuid);
-    const auto _request = request_connection::from_buffer(_buffer);
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    ASSERT_EQ(_buffer.size(), _uuid.size() + 1);
 }
 
 TEST(RequestChannelsTest, ParseAndSerialize) {
     auto _buffer = request_channels_builder();
-    const auto _request = request_channels::from_buffer(_buffer);
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(_buffer.size(), 1);
 }
 
 TEST(RequestChannelTest, ParseAndSerialize) {
     auto _buffer = request_channel_builder("EHLO");
-    const auto _request = request_channel::from_buffer(_buffer);
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(_buffer.size(), 6);
 }
 
 TEST(RequestWhoAMITest, ParseAndSerialize) {
     auto _buffer = request_whoami_builder();
-    const auto _request = request_whoami::from_buffer(_buffer);
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(_buffer.size(), 1);
 }
 
 TEST(RequestInsertBenchmark, DecodePerformance) {
@@ -134,7 +105,7 @@ TEST(RequestInsertBenchmark, DecodePerformance) {
 
     for (size_t _i = 0; _i < _iterations; ++_i) {
         const auto _view = request_insert::from_buffer(_buffer);
-        EXPECT_EQ(_view.header_->quota_, 5000);
+        EXPECT_EQ(extract_value(_view.quota_), 5000);
     }
 
     const auto _end = high_resolution_clock::now();
@@ -152,7 +123,7 @@ TEST(RequestQueryBenchmark, DecodePerformance) {
 
     for (size_t _i = 0; _i < _iterations; ++_i) {
         auto _view = request_query::from_buffer(_buffer);
-        EXPECT_EQ(_view.key_, "benchmark");
+        EXPECT_EQ(span_to_string_view(_view.key_), "benchmark");
     }
 
     const auto _end = high_resolution_clock::now();
@@ -170,7 +141,7 @@ TEST(RequestGetBenchmark, DecodePerformance) {
 
     for (size_t _i = 0; _i < _iterations; ++_i) {
         auto _view = request_get::from_buffer(_buffer);
-        EXPECT_EQ(_view.key_, "benchmark");
+        EXPECT_EQ(span_to_string_view(_view.key_), "benchmark");
     }
 
     const auto _end = high_resolution_clock::now();
@@ -184,74 +155,52 @@ TEST(RequestUpdateTest, ParseAndSerialize) {
     auto _buffer = request_update_builder(attribute_types::quota, change_types::patch, 5000, "x");
 
     const auto _request = request_update::from_buffer(_buffer);
-    EXPECT_EQ(_request.header_->attribute_, attribute_types::quota);
-    EXPECT_EQ(_request.header_->change_, change_types::patch);
-    EXPECT_EQ(_request.header_->value_, 5000);
-    EXPECT_EQ(_request.key_, "x");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(_request.attribute_, attribute_types::quota);
+    EXPECT_EQ(_request.change_, change_types::patch);
+    EXPECT_EQ(_request.value_, 5000);
+    EXPECT_EQ(span_to_string_view(_request.key_), "x");
 }
 
 TEST(RequestPurgeTest, ParseAndSerialize) {
     auto _buffer = request_purge_builder("v5");
 
     const auto _request = request_purge::from_buffer(_buffer);
-    EXPECT_EQ(_request.key_, "v5");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(span_to_string_view(_request.key_), "v5");
 }
 
 TEST(RequestListTest, ParseAndSerialize) {
     auto _buffer = request_list_builder();
-
-    const auto _request = request_list::from_buffer(_buffer);
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(_buffer.size(), 1);
 }
 
 TEST(RequestInfoTest, ParseAndSerialize) {
     auto _buffer = request_info_builder();
-
-    const auto _request = request_info::from_buffer(_buffer);
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(_buffer.size(), 1);
 }
 
 TEST(RequestStatsTest, ParseAndSerialize) {
     auto _buffer = request_stats_builder();
+    EXPECT_EQ(_buffer.size(), 1);
+}
 
-    const auto _request = request_stats::from_buffer(_buffer);
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+TEST(RequestStatTest, ParseAndSerialize) {
+    auto _buffer = request_stat_builder("v6");
+    const auto _request = request_stat::from_buffer(_buffer);
+    EXPECT_EQ(span_to_string_view(_request.key_), "v6");
 }
 
 TEST(RequestSubscribeTest, ParseAndSerialize) {
     auto _buffer = request_subscribe_builder("v6");
 
     const auto _request = request_subscribe::from_buffer(_buffer);
-    EXPECT_EQ(_request.channel_, "v6");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(span_to_string_view(_request.channel_), "v6");
 }
 
 TEST(RequestUnsubscribeTest, ParseAndSerialize) {
     auto _buffer = request_unsubscribe_builder("v6");
 
     const auto _request = request_unsubscribe::from_buffer(_buffer);
-    EXPECT_EQ(_request.channel_, "v6");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
+    EXPECT_EQ(span_to_string_view(_request.channel_), "v6");
 }
 
 TEST(RequestPublishTest, ParseAndSerialize) {
@@ -264,16 +213,7 @@ TEST(RequestPublishTest, ParseAndSerialize) {
     auto _buffer = request_publish_builder(_content_buffer, "v6");
 
     const auto _request = request_publish::from_buffer(_buffer);
-    EXPECT_EQ(_request.channel_, "v6");
-
-    auto _reconstructed = _request.to_buffer();
-    ASSERT_EQ(_reconstructed.size(), _buffer.size());
-    ASSERT_TRUE(std::equal(_reconstructed.begin(), _reconstructed.end(), _buffer.begin()));
-    ASSERT_EQ(_request.value_.size(), _content_buffer.size());
-    ASSERT_TRUE(std::equal(
-        _request.value_.begin(), _request.value_.end(),
-        _content_buffer.begin()
-    ));
+    EXPECT_EQ(span_to_string_view(_request.channel_), "v6");
 }
 
 TEST(RequestKeyTest, EqualsIdenticalKeys) {

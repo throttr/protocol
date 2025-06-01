@@ -29,7 +29,7 @@ namespace throttr {
         /**
          * ID
          */
-        std::array<std::byte, 16> id_;
+        std::array<std::byte, 16> id_{};
     };
 
     /**
@@ -42,10 +42,7 @@ namespace throttr {
      * Request connection
      */
     struct request_connection {
-        /**
-         * Header
-         */
-        const request_connection_header *header_ = nullptr;
+        std::span<const std::byte, 16> id_;
 
         /**
          * From buffer
@@ -54,25 +51,13 @@ namespace throttr {
          * @return request_connection
          */
         static request_connection from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_connection_header *>(buffer.data()); // NOSONAR
+            const auto _id_span = std::span<const std::byte, 16>(
+                buffer.data() + 1, 16
+            );
 
             return request_connection{
-                _header,
+                _id_span
             };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_connection_header_size);
-            std::memcpy(_buffer.data(), header_, request_connection_header_size);
-
-            return _buffer;
         }
     };
 
@@ -85,14 +70,13 @@ namespace throttr {
     inline std::vector<std::byte> request_connection_builder(
         const std::array<std::byte, 16> &id
     ) {
-        std::vector<std::byte> _buffer;
-        _buffer.resize(request_connection_header_size);
-
-        auto *_header = reinterpret_cast<request_connection_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::connection;
-        _header->id_ = id;
-
-        return _buffer;
+        return {
+            static_cast<std::byte>(request_types::connection),
+            id[0], id[1], id[2], id[3],
+            id[4], id[5], id[6], id[7],
+            id[8], id[9], id[10], id[11],
+            id[12], id[13], id[14], id[15],
+        };
     }
 }
 

@@ -58,14 +58,24 @@ namespace throttr {
      */
     struct request_update {
         /**
-         * Header
+         * Attribute
          */
-        const request_update_header *header_ = nullptr;
+        attribute_types attribute_;
+
+        /**
+         * Change
+         */
+        change_types change_;
+
+        /**
+         * Value
+         */
+        value_type value_;
 
         /**
          * Key
          */
-        std::string_view key_;
+        std::span<const std::byte> key_;
 
         /**
          * From buffer
@@ -74,29 +84,33 @@ namespace throttr {
          * @return request_update
          */
         static request_update from_buffer(const std::span<const std::byte> &buffer) {
-            const auto *_header = reinterpret_cast<const request_update_header *>(buffer.data()); // NOSONAR
-            const auto _key = buffer.subspan(request_update_header_size, _header->key_size_);
+            std::size_t _offset = 1;
+
+            const auto _attribute = static_cast<attribute_types>(
+                std::to_integer<uint8_t>(buffer[_offset])
+            );
+            _offset++;
+
+            const auto _change = static_cast<change_types>(
+                std::to_integer<uint8_t>(buffer[_offset])
+            );
+            _offset++;
+
+            value_type _value = 0;
+            std::memcpy(&_value, buffer.data() + _offset, sizeof(value_type));
+            _offset += sizeof(value_type);
+
+            const auto _key_size = std::to_integer<uint8_t>(buffer[_offset]);
+            _offset++;
+
+            const auto _key = buffer.subspan(_offset, _key_size);
 
             return request_update{
-                _header,
-                std::string_view(reinterpret_cast<const char *>(_key.data()), _key.size()), // NOSONAR
+                _attribute,
+                _change,
+                _value,
+                _key
             };
-        }
-
-        /**
-         * To buffer
-         *
-         * @return std::vector<std::byte>
-         */
-        [[nodiscard]]
-        std::vector<std::byte> to_buffer() const {
-            std::vector<std::byte> _buffer;
-            _buffer.resize(request_update_header_size + key_.size());
-
-            std::memcpy(_buffer.data(), header_, request_update_header_size);
-            std::memcpy(_buffer.data() + request_update_header_size, key_.data(), key_.size());
-
-            return _buffer;
         }
     };
 
@@ -115,17 +129,18 @@ namespace throttr {
         const change_types change = change_types::patch,
         const value_type value = 0,
         const std::string_view key = ""
-    ) {
+        ) {
         std::vector<std::byte> _buffer;
         _buffer.resize(request_update_header_size + key.size());
 
-        auto *_header = reinterpret_cast<request_update_header *>(_buffer.data()); // NOSONAR
-        _header->request_type_ = request_types::update;
-        _header->attribute_ = attribute;
-        _header->change_ = change;
-        _header->value_ = value;
-        _header->key_size_ = static_cast<uint8_t>(key.size());
+        request_update_header _header{};
+        _header.request_type_ = request_types::update;
+        _header.attribute_ = attribute;
+        _header.change_ = change;
+        _header.value_ = value;
+        _header.key_size_ = static_cast<uint8_t>(key.size());
 
+        std::memcpy(_buffer.data(), &_header, sizeof(_header));
         std::memcpy(_buffer.data() + request_update_header_size, key.data(), key.size());
 
         return _buffer;
