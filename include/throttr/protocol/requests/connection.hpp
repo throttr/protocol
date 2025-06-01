@@ -85,16 +85,13 @@ namespace throttr {
     inline std::vector<std::byte> request_connection_builder(
         const std::array<std::byte, 16> &id
     ) {
-        std::vector<std::byte> _buffer;
-        _buffer.resize(request_connection_header_size);
-
-        request_connection_header _header{};
-        _header.request_type_ = request_types::connection;
-        _header.id_ = id;
-
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-
-        return _buffer;
+        return {
+            static_cast<std::byte>(request_types::connection),
+            id[0], id[1], id[2], id[3],
+            id[4], id[5], id[6], id[7],
+            id[8], id[9], id[10], id[11],
+            id[12], id[13], id[14], id[15],
+        };
     }
 }
 
