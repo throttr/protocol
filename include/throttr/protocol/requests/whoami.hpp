@@ -76,15 +76,9 @@ namespace throttr {
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_whoami_builder() {
-        std::vector<std::byte> _buffer;
-        _buffer.resize(request_whoami_header_size);
-
-        request_whoami_header _header{};
-        _header.request_type_ = request_types::whoami;
-
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-
-        return _buffer;
+        return {
+            static_cast<std::byte>(request_types::whoami)
+        };
     }
 }
 

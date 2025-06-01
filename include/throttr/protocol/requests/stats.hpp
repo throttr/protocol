@@ -77,15 +77,9 @@ namespace throttr {
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_stats_builder() {
-        std::vector<std::byte> _buffer;
-        _buffer.resize(request_stats_header_size);
-
-        request_stats_header _header{};
-        _header.request_type_ = request_types::stats;
-
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-
-        return _buffer;
+        return {
+            static_cast<std::byte>(request_types::stats)
+        };
     }
 }
 

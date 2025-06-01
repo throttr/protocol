@@ -76,14 +76,9 @@ namespace throttr {
      * @return std::vector<std::byte>
      */
     inline std::vector<std::byte> request_channels_builder() {
-        std::vector<std::byte> _buffer;
-        _buffer.resize(request_channels_header_size);
-
-        request_channels_header _header{};
-        _header.request_type_ = request_types::channels;
-        std::memcpy(_buffer.data(), &_header, sizeof(_header));
-
-        return _buffer;
+        return {
+            static_cast<std::byte>(request_types::channels)
+        };
     }
 }
 
