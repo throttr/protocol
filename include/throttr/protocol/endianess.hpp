@@ -39,12 +39,14 @@ namespace throttr {
 
         if (!is_big_endian()) return value;
 
+        // LCOV_EXCL_START
         T result = 0;
         for (std::size_t i = 0; i < sizeof(T); ++i) {
             result |= ((value >> (8 * i)) & 0xFF) << (8 * (sizeof(T) - i - 1));
         }
         return result;
     }
+    // LCOV_EXCL_STOP
 }
 
 #endif // THROTTR_PROTOCOL_ENDIAN_HPP
