@@ -23,7 +23,7 @@ namespace throttr {
      */
     inline bool is_big_endian() {
         constexpr uint16_t _test = 0x0102;
-        return reinterpret_cast<const uint8_t*>(&_test)[0] == 0x01;
+        return reinterpret_cast<const uint8_t*>(&_test)[0] == 0x01; // NOSONAR
     }
 
     /**
