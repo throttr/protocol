@@ -146,7 +146,8 @@ namespace throttr {
         std::memcpy(_buffer.data() + _offset, &change, sizeof(change_types)); // NOSONAR
         _offset += sizeof(change_types);
 
-        std::memcpy(_buffer.data() + _offset, &value, sizeof(value_type));
+        const value_type _value_le = to_little_endian(value);
+        std::memcpy(_buffer.data() + _offset, &_value_le, sizeof(value_type));
         _offset += sizeof(value_type);
 
         const auto _key_size = static_cast<uint8_t>(key.size());

@@ -36,9 +36,9 @@ TEST(RequestInsertTest, ParseAndSerialize) {
     EXPECT_EQ(_buffer[0], static_cast<std::byte>(request_types::insert));
 
     const auto _request = request_insert::from_buffer(_buffer);
-    EXPECT_EQ(extract_value(_request.quota_), 5000);
+    EXPECT_EQ(extract_value(_request.quota_), to_little_endian(5000));
     EXPECT_EQ(_request.ttl_type_, ttl_types::milliseconds);
-    EXPECT_EQ(extract_value(_request.ttl_), 60000);
+    EXPECT_EQ(extract_value(_request.ttl_), to_little_endian(60000));
     EXPECT_EQ(span_to_string_view(_request.key_), "127.0.0.1:8000/api/resource");
 }
 
@@ -54,7 +54,7 @@ TEST(RequestSetTest, ParseAndSerialize) {
 
     const auto _request = request_set::from_buffer(_buffer);
     EXPECT_EQ(_request.ttl_type_, ttl_types::milliseconds);
-    EXPECT_EQ(extract_value(_request.ttl_), 60000);
+    EXPECT_EQ(extract_value(_request.ttl_), to_little_endian(60000));
     EXPECT_EQ(span_to_string_view(_request.key_), "127.0.0.1:8000/api/resource");
 }
 
@@ -119,7 +119,7 @@ TEST(RequestInsertBenchmark, DecodePerformance) {
 
     for (size_t _i = 0; _i < _iterations; ++_i) {
         const auto _view = request_insert::from_buffer(_buffer);
-        EXPECT_EQ(extract_value(_view.quota_), 5000);
+        EXPECT_EQ(extract_value(_view.quota_), to_little_endian(5000));
     }
 
     const auto _end = high_resolution_clock::now();
@@ -172,7 +172,7 @@ TEST(RequestUpdateTest, ParseAndSerialize) {
     const auto _request = request_update::from_buffer(_buffer);
     EXPECT_EQ(_request.attribute_, attribute_types::quota);
     EXPECT_EQ(_request.change_, change_types::patch);
-    EXPECT_EQ(_request.value_, 5000);
+    EXPECT_EQ(_request.value_, to_little_endian(5000));
     EXPECT_EQ(span_to_string_view(_request.key_), "x");
 }
 
