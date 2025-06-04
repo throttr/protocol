@@ -24,6 +24,7 @@
 #include <vector>
 #include <cstdint>
 
+#include <throttr/protocol/endianess.hpp>
 #include <throttr/protocol/value_type.hpp>
 #include <throttr/protocol/request_types.hpp>
 #include <throttr/protocol/entry_types.hpp>

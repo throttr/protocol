@@ -109,7 +109,7 @@ namespace throttr {
         std::memcpy(_buffer.data() + _offset, &_channel_size, sizeof(uint8_t)); // NOSONAR
         _offset += sizeof(uint8_t);
 
-        const auto _buffer_size = static_cast<value_type>(buffer.size());
+        const auto _buffer_size = to_little_endian(static_cast<value_type>(buffer.size()));
         std::memcpy(_buffer.data() + _offset, &_buffer_size, sizeof(value_type));
         _offset += sizeof(value_type);
 
