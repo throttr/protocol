@@ -237,6 +237,28 @@ TEST(RequestPublishTest, ParseAndSerialize) {
 
     const auto _request = request_publish::from_buffer(_buffer);
     EXPECT_EQ(span_to_string_view(_request.channel_), "v6");
+    EXPECT_EQ(_request.value_[0], std::byte{0x00});
+    EXPECT_EQ(_request.value_[1], std::byte{0x01});
+    EXPECT_EQ(_request.value_[2], std::byte{0x03});
+    EXPECT_EQ(_request.value_[3], std::byte{0x04});
+}
+
+TEST(RequestEventTest, ParseAndSerialize) {
+    std::vector _content_buffer = {
+        std::byte{0x00},
+        std::byte{0x01},
+        std::byte{0x03},
+        std::byte{0x04}
+    };
+
+    auto _buffer = request_event_builder(_content_buffer);
+    EXPECT_EQ(_buffer[0], static_cast<std::byte>(request_types::event));
+
+    const auto _request = request_event::from_buffer(_buffer);
+    EXPECT_EQ(_request.buffer_[0], std::byte{0x00});
+    EXPECT_EQ(_request.buffer_[1], std::byte{0x01});
+    EXPECT_EQ(_request.buffer_[2], std::byte{0x03});
+    EXPECT_EQ(_request.buffer_[3], std::byte{0x04});
 }
 
 TEST(RequestKeyTest, EqualsIdenticalKeys) {
