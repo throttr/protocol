@@ -50,6 +50,7 @@
 #include <throttr/protocol/requests/channels.hpp>
 #include <throttr/protocol/requests/channel.hpp>
 #include <throttr/protocol/requests/whoami.hpp>
+#include <throttr/protocol/requests/event.hpp>
 
 #include <throttr/protocol/request_key.hpp>
 #include <throttr/protocol/request_key_hasher.hpp>
