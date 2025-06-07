@@ -110,6 +110,11 @@ namespace throttr {
          * whoami
          */
         whoami = 0x18,
+
+        /**
+         * event
+         */
+        event = 0x19,
     };
 }
 
