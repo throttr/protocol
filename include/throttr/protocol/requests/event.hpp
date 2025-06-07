@@ -78,7 +78,7 @@ namespace throttr {
         const std::vector<std::byte> &buffer
     ) {
         std::vector<std::byte> _buffer;
-        const std::size_t _total_size = request_publish_header_size + buffer.size();
+        const std::size_t _total_size = request_event_header_size + buffer.size();
         _buffer.resize(_total_size);
 
         std::size_t _offset = 0;
