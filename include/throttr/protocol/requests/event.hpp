@@ -66,7 +66,7 @@ namespace throttr {
             std::size_t _offset = 1;
 
             uint8_t _channel_size = 0;
-            std::memcpy(&_channel_size, buffer.data() + _offset, sizeof(uint8_t));
+            std::memcpy(&_channel_size, buffer.data() + _offset, sizeof(uint8_t)); // NOSONAR
             _offset += sizeof(uint8_t);
 
             value_type _buffer_size = 0;
