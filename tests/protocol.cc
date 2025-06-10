@@ -251,10 +251,14 @@ TEST(RequestEventTest, ParseAndSerialize) {
         std::byte{0x04}
     };
 
-    auto _buffer = request_event_builder(_content_buffer);
+    auto _buffer = request_event_builder(_content_buffer, "***");
     EXPECT_EQ(_buffer[0], static_cast<std::byte>(request_types::event));
+    EXPECT_EQ(_buffer[1], static_cast<std::byte>(3));
 
     const auto _request = request_event::from_buffer(_buffer);
+    EXPECT_EQ(_request.channel_[0], std::byte{0x2A});
+    EXPECT_EQ(_request.channel_[1], std::byte{0x2A});
+    EXPECT_EQ(_request.channel_[2], std::byte{0x2A});
     EXPECT_EQ(_request.buffer_[0], std::byte{0x00});
     EXPECT_EQ(_request.buffer_[1], std::byte{0x01});
     EXPECT_EQ(_request.buffer_[2], std::byte{0x03});
